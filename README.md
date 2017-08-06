@@ -25,14 +25,14 @@ A Go library for validating struct and field.
 
 ## Examples
 
-- [Single field](examples/single-field)
-- [Flag field](examples/flag-field)
-- [Simple struct](examples/simple-struct)
-- [Nested struct](examples/nested-struct)
-- [Nested struct (schema inside)](examples/nested-struct-schema-inside)
-- [Nested struct pointer](examples/nested-struct-pointer)
-- [Nested struct slice](examples/nested-struct-slice)
-- [Nested struct map](examples/nested-struct-map)
+- [Single field](examples/single-field/main.go)
+- [Flag field](examples/flag-field/main.go)
+- [Simple struct](examples/simple-struct/main.go)
+- [Nested struct](examples/nested-struct/main.go)
+- [Nested struct (schema inside)](examples/nested-struct-schema-inside/main.go)
+- [Nested struct pointer](examples/nested-struct-pointer/main.go)
+- [Nested struct slice](examples/nested-struct-slice/main.go)
+- [Nested struct map](examples/nested-struct-map/main.go)
 
 
 ## Thanks
@@ -45,13 +45,19 @@ This library borrows some ideas from the following libraries:
 
 - [alecthomas/voluptuous][2]
 
-    Support composite-style validator `All`/`And`, `Any`/`Or`.
+    Support composite-style validators `All`/`And`, `Any`/`Or`.
 
 - [go-validator/validator][3]
 
     Use the term `nonzero` instead of `required`/`optional`.
 
 
+## License
+
+[MIT][4]
+
+
 [1]: https://github.com/mholt/binding
 [2]: https://github.com/alecthomas/voluptuous
 [3]: https://github.com/go-validator/validator
+[4]: http://opensource.org/licenses/MIT
