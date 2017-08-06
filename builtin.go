@@ -218,6 +218,8 @@ func Nonzero(msgs ...string) Validator {
 			valid = *t != nil
 		case *[]time.Time:
 			valid = len(*t) != 0
+		case *time.Duration:
+			valid = *t != 0
 		default:
 			return NewErrors(field.Name, ErrUnrecognized, "of unrecognized type")
 		}
@@ -295,6 +297,8 @@ func Len(min, max int, msgs ...string) Validator {
 		case *[]time.Time:
 			l := len(*t)
 			valid = l >= min && l <= max
+		case *time.Duration:
+			valid = *t >= time.Duration(min) && *t <= time.Duration(max)
 		default:
 			return NewErrors(field.Name, ErrUnrecognized, "of an unrecognized type")
 		}
