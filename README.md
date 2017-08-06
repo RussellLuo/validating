@@ -1,6 +1,6 @@
 # validating
 
-A Go library for validating struct and field.
+A Go library for validating structs and fields.
 
 
 ## Features
@@ -35,29 +35,35 @@ A Go library for validating struct and field.
 - [Nested struct map](examples/nested-struct-map/main.go)
 
 
+## Documentation
+
+Check out the [Godoc][1].
+
+
 ## Thanks
 
 This library borrows some ideas from the following libraries:
 
-- [mholt/binding][1]
+- [mholt/binding][2]
 
     Prefer no reflection.
 
-- [alecthomas/voluptuous][2]
+- [alecthomas/voluptuous][3]
 
     Support composite-style validators `All`/`And`, `Any`/`Or`.
 
-- [go-validator/validator][3]
+- [go-validator/validator][4]
 
     Use the term `nonzero` instead of `required`/`optional`.
 
 
 ## License
 
-[MIT][4]
+[MIT][5]
 
 
-[1]: https://github.com/mholt/binding
-[2]: https://github.com/alecthomas/voluptuous
-[3]: https://github.com/go-validator/validator
-[4]: http://opensource.org/licenses/MIT
+[1]: http://godoc.org/github.com/RussellLuo/validating
+[2]: https://github.com/mholt/binding
+[3]: https://github.com/alecthomas/voluptuous
+[4]: https://github.com/go-validator/validator
+[5]: http://opensource.org/licenses/MIT
