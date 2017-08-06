@@ -4,7 +4,7 @@ import (
 	"time"
 )
 
-// Func represents a prototype of the validator's Validate function.
+// validateFunc represents a prototype of the validator's Validate function.
 type validateFunc func(field Field) Errors
 
 // funcValidator is a validator which is made from a function.
@@ -327,7 +327,7 @@ func Gt(value interface{}, msgs ...string) Validator {
 			*bool, **bool, *[]bool,
 			**string, *[]string,
 			**time.Time, *[]time.Time:
-			return NewErrors(field.Name, ErrUnsupported, "cannot use validator `Len`")
+			return NewErrors(field.Name, ErrUnsupported, "cannot use validator `Gt`")
 		case *uint8:
 			valid = *t > value.(uint8)
 		case *uint16:
@@ -386,7 +386,7 @@ func Gte(value interface{}, msgs ...string) Validator {
 			*bool, **bool, *[]bool,
 			**string, *[]string,
 			**time.Time, *[]time.Time:
-			return NewErrors(field.Name, ErrUnsupported, "cannot use validator `Len`")
+			return NewErrors(field.Name, ErrUnsupported, "cannot use validator `Gte`")
 		case *uint8:
 			valid = *t >= value.(uint8)
 		case *uint16:
@@ -435,11 +435,14 @@ func Lt(value interface{}, msgs ...string) Validator {
 	validator := Gte(value, msg)
 	return FromFunc(func(field Field) Errors {
 		errs := validator.Validate(field)
-		switch {
-		case errs == nil:
+		if errs == nil {
 			return NewErrors(field.Name, ErrInvalid, msg)
-		case errs[0].Kind() != ErrInvalid:
+		}
+		switch errs[0].Kind() {
+		case ErrUnsupported:
 			return errs
+		case ErrUnrecognized:
+			return NewErrors(field.Name, ErrUnrecognized, "cannot use validator `Lt`")
 		default:
 			return nil
 		}
@@ -449,15 +452,18 @@ func Lt(value interface{}, msgs ...string) Validator {
 // Lte creates a leaf validator, which will succeed
 // when the field's value is lower than or equal to the given value.
 func Lte(value interface{}, msgs ...string) Validator {
-	msg := getMsg("Lt", "is greater than give value", msgs...)
+	msg := getMsg("Lte", "is greater than give value", msgs...)
 	validator := Gt(value, msg)
 	return FromFunc(func(field Field) Errors {
 		errs := validator.Validate(field)
-		switch {
-		case errs == nil:
+		if errs == nil {
 			return NewErrors(field.Name, ErrInvalid, msg)
-		case errs[0].Kind() != ErrInvalid:
+		}
+		switch errs[0].Kind() {
+		case ErrUnsupported:
 			return errs
+		case ErrUnrecognized:
+			return NewErrors(field.Name, ErrUnrecognized, "cannot use validator `Lte`")
 		default:
 			return nil
 		}
