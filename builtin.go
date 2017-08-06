@@ -106,7 +106,7 @@ func Assert(b bool, msgs ...string) Validator {
 	msg := getMsg("Assert", "is invalid", msgs...)
 	return FromFunc(func(field Field) Errors {
 		if !b {
-			return NewErrors(field.Name, msg)
+			return NewErrors(field.Name, ErrInvalid, msg)
 		}
 		return nil
 	})
@@ -219,11 +219,11 @@ func Nonzero(msgs ...string) Validator {
 		case *[]time.Time:
 			valid = len(*t) != 0
 		default:
-			return NewErrors(field.Name, "of unrecognized type")
+			return NewErrors(field.Name, ErrUnrecognized, "of unrecognized type")
 		}
 
 		if !valid {
-			return NewErrors(field.Name, msg)
+			return NewErrors(field.Name, ErrInvalid, msg)
 		}
 		return nil
 	})
@@ -246,7 +246,7 @@ func Len(min, max int, msgs ...string) Validator {
 			*bool, **bool,
 			**string,
 			*time.Time, **time.Time:
-			return NewErrors(field.Name, "cannot use validator `Len`")
+			return NewErrors(field.Name, ErrUnsupported, "cannot use validator `Len`")
 		case *[]uint8:
 			l := len(*t)
 			valid = l >= min && l <= max
@@ -296,12 +296,172 @@ func Len(min, max int, msgs ...string) Validator {
 			l := len(*t)
 			valid = l >= min && l <= max
 		default:
-			return NewErrors(field.Name, "of an unrecognized type")
+			return NewErrors(field.Name, ErrUnrecognized, "of an unrecognized type")
 		}
 
 		if !valid {
-			return NewErrors(field.Name, msg)
+			return NewErrors(field.Name, ErrInvalid, msg)
 		}
 		return nil
 	})
+}
+
+// Gt creates a leaf validator, which will succeed
+// when the field's value is greater than the given value.
+func Gt(value interface{}, msgs ...string) Validator {
+	msg := getMsg("Gt", "is lower than or equal to given value", msgs...)
+	return FromFunc(func(field Field) Errors {
+		valid := false
+
+		switch t := field.ValuePtr.(type) {
+		case **uint8, *[]uint8, **uint16, *[]uint16,
+			**uint32, *[]uint32, **uint64, *[]uint64,
+			**int8, *[]int8, **int16, *[]int16,
+			**int32, *[]int32, **int64, *[]int64,
+			**float32, *[]float32, **float64, *[]float64,
+			**uint, *[]uint, **int, *[]int,
+			*bool, **bool, *[]bool,
+			**string, *[]string,
+			**time.Time, *[]time.Time:
+			return NewErrors(field.Name, ErrUnsupported, "cannot use validator `Len`")
+		case *uint8:
+			valid = *t > value.(uint8)
+		case *uint16:
+			valid = *t > value.(uint16)
+		case *uint32:
+			valid = *t > value.(uint32)
+		case *uint64:
+			valid = *t > value.(uint64)
+		case *int8:
+			valid = *t > value.(int8)
+		case *int16:
+			valid = *t > value.(int16)
+		case *int32:
+			valid = *t > value.(int32)
+		case *int64:
+			valid = *t > value.(int64)
+		case *float32:
+			valid = *t > value.(float32)
+		case *float64:
+			valid = *t > value.(float64)
+		case *uint:
+			valid = *t > value.(uint)
+		case *int:
+			valid = *t > value.(int)
+		case *string:
+			valid = *t > value.(string)
+		case *time.Time:
+			valid = (*t).After(value.(time.Time))
+		case *time.Duration:
+			valid = *t > value.(time.Duration)
+		default:
+			return NewErrors(field.Name, ErrUnrecognized, "of an unrecognized type")
+		}
+
+		if !valid {
+			return NewErrors(field.Name, ErrInvalid, msg)
+		}
+		return nil
+	})
+}
+
+// Gte creates a leaf validator, which will succeed
+// when the field's value is greater than or equal to the given value.
+func Gte(value interface{}, msgs ...string) Validator {
+	msg := getMsg("Gte", "is lower than give value", msgs...)
+	return FromFunc(func(field Field) Errors {
+		valid := false
+
+		switch t := field.ValuePtr.(type) {
+		case **uint8, *[]uint8, **uint16, *[]uint16,
+			**uint32, *[]uint32, **uint64, *[]uint64,
+			**int8, *[]int8, **int16, *[]int16,
+			**int32, *[]int32, **int64, *[]int64,
+			**float32, *[]float32, **float64, *[]float64,
+			**uint, *[]uint, **int, *[]int,
+			*bool, **bool, *[]bool,
+			**string, *[]string,
+			**time.Time, *[]time.Time:
+			return NewErrors(field.Name, ErrUnsupported, "cannot use validator `Len`")
+		case *uint8:
+			valid = *t >= value.(uint8)
+		case *uint16:
+			valid = *t >= value.(uint16)
+		case *uint32:
+			valid = *t >= value.(uint32)
+		case *uint64:
+			valid = *t >= value.(uint64)
+		case *int8:
+			valid = *t >= value.(int8)
+		case *int16:
+			valid = *t >= value.(int16)
+		case *int32:
+			valid = *t >= value.(int32)
+		case *int64:
+			valid = *t >= value.(int64)
+		case *float32:
+			valid = *t >= value.(float32)
+		case *float64:
+			valid = *t >= value.(float64)
+		case *uint:
+			valid = *t >= value.(uint)
+		case *int:
+			valid = *t >= value.(int)
+		case *string:
+			valid = *t >= value.(string)
+		case *time.Time:
+			valid = !(*t).Before(value.(time.Time))
+		case *time.Duration:
+			valid = *t >= value.(time.Duration)
+		default:
+			return NewErrors(field.Name, ErrUnrecognized, "of an unrecognized type")
+		}
+
+		if !valid {
+			return NewErrors(field.Name, ErrInvalid, msg)
+		}
+		return nil
+	})
+}
+
+// Lt creates a leaf validator, which will succeed
+// when the field's value is lower than the given value.
+func Lt(value interface{}, msgs ...string) Validator {
+	msg := getMsg("Lt", "is greater than or equal to give value", msgs...)
+	validator := Gte(value, msg)
+	return FromFunc(func(field Field) Errors {
+		errs := validator.Validate(field)
+		switch {
+		case errs == nil:
+			return NewErrors(field.Name, ErrInvalid, msg)
+		case errs[0].Kind() != ErrInvalid:
+			return errs
+		default:
+			return nil
+		}
+	})
+}
+
+// Lte creates a leaf validator, which will succeed
+// when the field's value is lower than or equal to the given value.
+func Lte(value interface{}, msgs ...string) Validator {
+	msg := getMsg("Lt", "is greater than give value", msgs...)
+	validator := Gt(value, msg)
+	return FromFunc(func(field Field) Errors {
+		errs := validator.Validate(field)
+		switch {
+		case errs == nil:
+			return NewErrors(field.Name, ErrInvalid, msg)
+		case errs[0].Kind() != ErrInvalid:
+			return errs
+		default:
+			return nil
+		}
+	})
+}
+
+// Range is a shortcut of `All(Gte(min), Lte(max))`.
+func Range(min, max interface{}, msgs ...string) Validator {
+	msg := getMsg("Range", "is not between given range", msgs...)
+	return All(Gte(min, msg), Lte(max, msg))
 }
