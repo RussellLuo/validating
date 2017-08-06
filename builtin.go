@@ -475,3 +475,144 @@ func Range(min, max interface{}, msgs ...string) Validator {
 	msg := getMsg("Range", "is not between given range", msgs...)
 	return All(Gte(min, msg), Lte(max, msg))
 }
+
+// In creates a leaf validator, which will succeed
+// when the field's value is equal to one of the given values.
+func In(values ...interface{}) Validator {
+	msg := "is not one of given values"
+	return FromFunc(func(field Field) Errors {
+		valid := false
+
+		switch t := field.ValuePtr.(type) {
+		case **uint8, *[]uint8, **uint16, *[]uint16,
+			**uint32, *[]uint32, **uint64, *[]uint64,
+			**int8, *[]int8, **int16, *[]int16,
+			**int32, *[]int32, **int64, *[]int64,
+			**float32, *[]float32, **float64, *[]float64,
+			**uint, *[]uint, **int, *[]int,
+			**bool, *[]bool,
+			**string, *[]string,
+			**time.Time, *[]time.Time:
+			return NewErrors(field.Name, ErrUnsupported, "cannot use validator `In`")
+		case *uint8:
+			for _, value := range values {
+				if *t == value.(uint8) {
+					valid = true
+					break
+				}
+			}
+		case *uint16:
+			for _, value := range values {
+				if *t == value.(uint16) {
+					valid = true
+					break
+				}
+			}
+		case *uint32:
+			for _, value := range values {
+				if *t == value.(uint32) {
+					valid = true
+					break
+				}
+			}
+		case *uint64:
+			for _, value := range values {
+				if *t == value.(uint64) {
+					valid = true
+					break
+				}
+			}
+		case *int8:
+			for _, value := range values {
+				if *t == value.(int8) {
+					valid = true
+					break
+				}
+			}
+		case *int16:
+			for _, value := range values {
+				if *t == value.(int16) {
+					valid = true
+					break
+				}
+			}
+		case *int32:
+			for _, value := range values {
+				if *t == value.(int32) {
+					valid = true
+					break
+				}
+			}
+		case *int64:
+			for _, value := range values {
+				if *t == value.(int64) {
+					valid = true
+					break
+				}
+			}
+		case *float32:
+			for _, value := range values {
+				if *t == value.(float32) {
+					valid = true
+					break
+				}
+			}
+		case *float64:
+			for _, value := range values {
+				if *t == value.(float64) {
+					valid = true
+					break
+				}
+			}
+		case *uint:
+			for _, value := range values {
+				if *t == value.(uint) {
+					valid = true
+					break
+				}
+			}
+		case *int:
+			for _, value := range values {
+				if *t == value.(int) {
+					valid = true
+					break
+				}
+			}
+		case *bool:
+			for _, value := range values {
+				if *t == value.(bool) {
+					valid = true
+					break
+				}
+			}
+		case *string:
+			for _, value := range values {
+				if *t == value.(string) {
+					valid = true
+					break
+				}
+			}
+		case *time.Time:
+			for _, value := range values {
+				if (*t).Equal(value.(time.Time)) {
+					valid = true
+					break
+				}
+			}
+		case *time.Duration:
+			for _, value := range values {
+				if *t == value.(time.Duration) {
+					valid = true
+					break
+				}
+			}
+		default:
+			return NewErrors(field.Name, ErrUnrecognized, "of an unrecognized type")
+		}
+
+		if !valid {
+			return NewErrors(field.Name, ErrInvalid, msg)
+		}
+		return nil
+	})
+}
