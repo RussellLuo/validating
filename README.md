@@ -16,7 +16,7 @@ A Go library for validating structs and fields.
 3. Flexible
 
     - Validators are composite.
-    - Nested stuct validation is well supported.
+    - Nested struct validation is well supported.
     - Schema can be defined inside or outside struct.
     - Validator customizations are made easy.
 
