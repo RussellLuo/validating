@@ -32,8 +32,8 @@ func getMsg(validatorName, defaultMsg string, msgs ...string) string {
 	}
 }
 
-// All creates a composite validator, which will succeed
-// only when all sub-validators succeed.
+// All is a composite validator factory to create a validator, which will
+// succeed only when all sub-validators succeed.
 func All(validators ...Validator) Validator {
 	return FromFunc(func(field Field) Errors {
 		for _, v := range validators {
@@ -48,8 +48,8 @@ func All(validators ...Validator) Validator {
 // And is an alias of All.
 var And = All
 
-// Any creates a composite validator, which will succeed
-// as long as any sub-validator succeeds.
+// Any is a composite validator factory to create a validator, which will
+// succeed as long as any sub-validator succeeds.
 func Any(validators ...Validator) Validator {
 	return FromFunc(func(field Field) Errors {
 		var errs Errors
@@ -85,15 +85,15 @@ func not(validator Validator, validatorName, msg string) Validator {
 	})
 }
 
-// Not creates a composite validator, which will succeed
-// when the given validator fails.
+// Not is a composite validator factory to create a validator, which will
+// succeed when the given validator fails.
 func Not(validator Validator, msgs ...string) Validator {
 	msg := getMsg("Not", "is invalid", msgs...)
 	return not(validator, "Not", msg)
 }
 
-// Nested creates a composite validator, which will delegate
-// the validation work to its inner schema.
+// Nested is a composite validator factory to create a validator, which will
+// delegate the validation work to its inner schema.
 func Nested(schema Schema) Validator {
 	return FromFunc(func(field Field) Errors {
 		nestedSchema := make(Schema, len(schema))
@@ -104,8 +104,8 @@ func Nested(schema Schema) Validator {
 	})
 }
 
-// NestedMulti creates a composite validator, which will delegate
-// the validation work to its inner multiple schemas, which are
+// NestedMulti is a composite validator factory to create a validator, which will
+// delegate the validation work to its inner multiple schemas, which are
 // returned by calling f.
 func NestedMulti(f func() []Schema) Validator {
 	schemas := f()
@@ -125,8 +125,17 @@ func NestedMulti(f func() []Schema) Validator {
 	})
 }
 
-// Assert creates a leaf validator, which will succeed
-// only when the boolean expression evaluates to true.
+// Lazy is a composite validator factory to create a validator, which will
+// call f only as needed, to delegate the validation work to
+// the actual validator returned by f.
+func Lazy(f func() Validator) Validator {
+	return FromFunc(func(field Field) Errors {
+		return f().Validate(field)
+	})
+}
+
+// Assert is a leaf validator factory to create a validator, which will
+// succeed only when the boolean expression evaluates to true.
 func Assert(b bool, msgs ...string) Validator {
 	msg := getMsg("Assert", "is invalid", msgs...)
 	return FromFunc(func(field Field) Errors {
@@ -137,16 +146,8 @@ func Assert(b bool, msgs ...string) Validator {
 	})
 }
 
-// Lazy creates a leaf validator, which will call f only as needed,
-// to delegate the validation work to the validator returned by f.
-func Lazy(f func() Validator) Validator {
-	return FromFunc(func(field Field) Errors {
-		return f().Validate(field)
-	})
-}
-
-// Nonzero creates a leaf validator, which will succeed
-// when the field's value is nonzero.
+// Nonzero is a leaf validator factory to create a validator, which will
+// succeed when the field's value is nonzero.
 func Nonzero(msgs ...string) Validator {
 	msg := getMsg("Nonzero", "is zero valued", msgs...)
 	return FromFunc(func(field Field) Errors {
@@ -256,8 +257,8 @@ func Nonzero(msgs ...string) Validator {
 	})
 }
 
-// Len creates a leaf validator, which will succeed
-// when the field's value is between min and max.
+// Len is a leaf validator factory to create a validator, which will
+// succeed when the field's value is between min and max.
 func Len(min, max int, msgs ...string) Validator {
 	msg := getMsg("Len", "with an invalid length", msgs...)
 	return FromFunc(func(field Field) Errors {
@@ -335,8 +336,8 @@ func Len(min, max int, msgs ...string) Validator {
 	})
 }
 
-// Gt creates a leaf validator, which will succeed
-// when the field's value is greater than the given value.
+// Gt is a leaf validator factory to create a validator, which will
+// succeed when the field's value is greater than the given value.
 func Gt(value interface{}, msgs ...string) Validator {
 	msg := getMsg("Gt", "is lower than or equal to given value", msgs...)
 	return FromFunc(func(field Field) Errors {
@@ -394,8 +395,8 @@ func Gt(value interface{}, msgs ...string) Validator {
 	})
 }
 
-// Gte creates a leaf validator, which will succeed
-// when the field's value is greater than or equal to the given value.
+// Gte is a leaf validator factory to create a validator, which will
+// succeed when the field's value is greater than or equal to the given value.
 func Gte(value interface{}, msgs ...string) Validator {
 	msg := getMsg("Gte", "is lower than give value", msgs...)
 	return FromFunc(func(field Field) Errors {
@@ -453,15 +454,15 @@ func Gte(value interface{}, msgs ...string) Validator {
 	})
 }
 
-// Lt creates a leaf validator, which will succeed
-// when the field's value is lower than the given value.
+// Lt is a leaf validator factory to create a validator, which will
+// succeed when the field's value is lower than the given value.
 func Lt(value interface{}, msgs ...string) Validator {
 	msg := getMsg("Lt", "is greater than or equal to give value", msgs...)
 	return not(Gte(value), "Lt", msg)
 }
 
-// Lte creates a leaf validator, which will succeed
-// when the field's value is lower than or equal to the given value.
+// Lte is a leaf validator factory to create a validator, which will
+// succeed when the field's value is lower than or equal to the given value.
 func Lte(value interface{}, msgs ...string) Validator {
 	msg := getMsg("Lte", "is greater than give value", msgs...)
 	return not(Gt(value), "Lte", msg)
@@ -473,8 +474,8 @@ func Range(min, max interface{}, msgs ...string) Validator {
 	return All(Gte(min, msg), Lte(max, msg))
 }
 
-// In creates a leaf validator, which will succeed
-// when the field's value is equal to one of the given values.
+// In is a leaf validator factory to create a validator, which will
+// succeed when the field's value is equal to one of the given values.
 func In(values ...interface{}) Validator {
 	msg := "is not one of given values"
 	return FromFunc(func(field Field) Errors {

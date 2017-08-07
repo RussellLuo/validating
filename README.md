@@ -50,7 +50,7 @@ This library borrows some ideas from the following libraries:
 
 - [alecthomas/voluptuous][3]
 
-    Support composite-style validators `All`/`And`, `Any`/`Or`.
+    Support composite-style validator factories `All`/`And`, `Any`/`Or`.
 
 - [go-validator/validator][4]
 
