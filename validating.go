@@ -7,8 +7,8 @@ type Field struct {
 }
 
 // F is a shortcut for creating an instance of Field.
-func F(name string, value interface{}) Field {
-	return Field{name, value}
+func F(name string, valuePtr interface{}) Field {
+	return Field{name, valuePtr}
 }
 
 // Validator is an interface for representing a validating's validator.
