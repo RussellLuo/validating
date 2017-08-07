@@ -1,9 +1,14 @@
 package validating
 
+import (
+	"fmt"
+	"strings"
+)
+
 const (
-	ErrUnsupported  = "unsupported"
-	ErrUnrecognized = "unrecognized"
-	ErrInvalid      = "invalid"
+	ErrUnsupported  = "UNSUPPORTED"
+	ErrUnrecognized = "UNRECOGNIZED"
+	ErrInvalid      = "INVALID"
 )
 
 type Error interface {
@@ -26,6 +31,14 @@ func (e *Errors) Append(err Error) {
 
 func (e *Errors) Extend(errs Errors) {
 	*e = append(*e, errs...)
+}
+
+func (e Errors) Error() string {
+	strs := make([]string, len(e))
+	for i, err := range e {
+		strs[i] = err.Error()
+	}
+	return strings.Join(strs, ", ")
 }
 
 type errorImpl struct {
@@ -51,5 +64,5 @@ func (e *errorImpl) Message() string {
 }
 
 func (e *errorImpl) Error() string {
-	return e.field + ": " + e.message
+	return fmt.Sprintf("%s: %s(%s)", e.field, e.kind, e.message)
 }
