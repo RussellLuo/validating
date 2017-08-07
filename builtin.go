@@ -21,6 +21,17 @@ func FromFunc(f validateFunc) Validator {
 	return &funcValidator{f}
 }
 
+func getMsg(validatorName, defaultMsg string, msgs ...string) string {
+	switch len(msgs) {
+	case 0:
+		return defaultMsg
+	case 1:
+		return msgs[0]
+	default:
+		panic(validatorName + " only accepts at most one `msg`!")
+	}
+}
+
 // All creates a composite validator, which will succeed
 // only when all sub-validators succeed.
 func All(validators ...Validator) Validator {
@@ -56,6 +67,31 @@ func Any(validators ...Validator) Validator {
 // Or is an alias of Any.
 var Or = Any
 
+// not is a helper function to negate the given validator.
+func not(validator Validator, validatorName, msg string) Validator {
+	return FromFunc(func(field Field) Errors {
+		errs := validator.Validate(field)
+		if errs == nil {
+			return NewErrors(field.Name, ErrInvalid, msg)
+		}
+		switch errs[0].Kind() {
+		case ErrUnrecognized:
+			return errs
+		case ErrUnsupported:
+			return NewErrors(field.Name, ErrUnsupported, "cannot use validator `"+validatorName+"`")
+		default:
+			return nil
+		}
+	})
+}
+
+// Not creates a composite validator, which will succeed
+// when the given validator fails.
+func Not(validator Validator, msgs ...string) Validator {
+	msg := getMsg("Not", "is invalid", msgs...)
+	return not(validator, "Not", msg)
+}
+
 // Nested creates a composite validator, which will delegate
 // the validation work to its inner schema.
 func Nested(schema Schema) Validator {
@@ -87,17 +123,6 @@ func NestedMulti(f func() []Schema) Validator {
 		}
 		return errs
 	})
-}
-
-func getMsg(validatorName, defaultMsg string, msgs ...string) string {
-	switch len(msgs) {
-	case 0:
-		return defaultMsg
-	case 1:
-		return msgs[0]
-	default:
-		panic(validatorName + " only accepts at most one `msg`!")
-	}
 }
 
 // Assert creates a leaf validator, which will succeed
@@ -432,42 +457,14 @@ func Gte(value interface{}, msgs ...string) Validator {
 // when the field's value is lower than the given value.
 func Lt(value interface{}, msgs ...string) Validator {
 	msg := getMsg("Lt", "is greater than or equal to give value", msgs...)
-	validator := Gte(value, msg)
-	return FromFunc(func(field Field) Errors {
-		errs := validator.Validate(field)
-		if errs == nil {
-			return NewErrors(field.Name, ErrInvalid, msg)
-		}
-		switch errs[0].Kind() {
-		case ErrUnsupported:
-			return errs
-		case ErrUnrecognized:
-			return NewErrors(field.Name, ErrUnrecognized, "cannot use validator `Lt`")
-		default:
-			return nil
-		}
-	})
+	return not(Gte(value), "Lt", msg)
 }
 
 // Lte creates a leaf validator, which will succeed
 // when the field's value is lower than or equal to the given value.
 func Lte(value interface{}, msgs ...string) Validator {
 	msg := getMsg("Lte", "is greater than give value", msgs...)
-	validator := Gt(value, msg)
-	return FromFunc(func(field Field) Errors {
-		errs := validator.Validate(field)
-		if errs == nil {
-			return NewErrors(field.Name, ErrInvalid, msg)
-		}
-		switch errs[0].Kind() {
-		case ErrUnsupported:
-			return errs
-		case ErrUnrecognized:
-			return NewErrors(field.Name, ErrUnrecognized, "cannot use validator `Lte`")
-		default:
-			return nil
-		}
-	})
+	return not(Gt(value), "Lte", msg)
 }
 
 // Range is a shortcut of `All(Gte(min), Lte(max))`.
