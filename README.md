@@ -23,12 +23,17 @@ A Go library for validating structs and fields.
 4. No reflection
 
 
-## Built-in validator factories
+## Validator factories and validators
 
-To be strict, this library has the concept of `validator factory`. A validator factory is a function to create a validator, which will do the actual validation.
+To be strict, this library has a conceptual distinction between `validator factory` and `validator`.
+
+A validator factory is a function to create a validator, which will do the actual validation.
+
+### Built-in validator factories
 
 Below are the built-in validator factories:
 
+- [FromFunc](https://godoc.org/github.com/RussellLuo/validating#FromFunc)
 - [All/And](https://godoc.org/github.com/RussellLuo/validating#All)
 - [Any/Or](https://godoc.org/github.com/RussellLuo/validating#All)
 - [Not](https://godoc.org/github.com/RussellLuo/validating#Not)
@@ -44,6 +49,68 @@ Below are the built-in validator factories:
 - [Lte](https://godoc.org/github.com/RussellLuo/validating#Lte)
 - [Range](https://godoc.org/github.com/RussellLuo/validating#Range)
 - [In](https://godoc.org/github.com/RussellLuo/validating#In)
+
+### Validator customizations
+
+1. From a boolean expression
+
+    ```go
+    validator := v.Assert(value != nil, "is empty")
+
+    // do validation
+    var value map[string]time.Time
+    v.Validate(v.Schema{
+        v.F("value", &value): validator,
+    })
+    ```
+
+2. From a function
+
+    ```go
+	validator := v.FromFunc(func(field Field) Errors {
+		switch t := field.ValuePtr.(type) {
+		case *map[string]time.Time:
+		    if *t == nil {
+		        return v.NewErrors(field.Name, v.ErrInvalid, "is empty")
+		    }
+		    return nil
+		default:
+		    return v.NewErrors(field.Name, v.ErrUnsupported, "is unsupported")
+		}
+	})
+
+    // do validation
+    var value map[string]time.Time
+    v.Validate(v.Schema{
+        v.F("value", &value): validator,
+    })
+    ```
+
+3. From a struct
+
+    ```go
+    type MyValidator struct{}
+
+    func (mv *MyValidator) Validate(field Field) Errors {
+		switch t := field.ValuePtr.(type) {
+		case *map[string]time.Time:
+		    if *t == nil {
+		        return v.NewErrors(field.Name, v.ErrInvalid, "is empty")
+		    }
+		    return nil
+		default:
+		    return v.NewErrors(field.Name, v.ErrUnsupported, "is unsupported")
+		}
+    }
+
+    validator := &MyValidator{}
+
+    // do validation
+    var value map[string]time.Time
+    v.Validate(v.Schema{
+        v.F("value", &value): validator,
+    })
+    ```
 
 
 ## Examples
