@@ -23,6 +23,29 @@ A Go library for validating structs and fields.
 4. No reflection
 
 
+## Built-in validator factories
+
+To be strict, this library has the concept of `validator factory`. A validator factory is a function to create a validator, which will do the actual validation.
+
+Below are the built-in validator factories:
+
+- [All/And](https://godoc.org/github.com/RussellLuo/validating#All)
+- [Any/Or](https://godoc.org/github.com/RussellLuo/validating#All)
+- [Not](https://godoc.org/github.com/RussellLuo/validating#Not)
+- [Nested](https://godoc.org/github.com/RussellLuo/validating#Nested)
+- [NestedMulti](https://godoc.org/github.com/RussellLuo/validating#NestedMulti)
+- [Lazy](https://godoc.org/github.com/RussellLuo/validating#Lazy)
+- [Assert](https://godoc.org/github.com/RussellLuo/validating#Assert)
+- [Nonzero](https://godoc.org/github.com/RussellLuo/validating#Nonzero)
+- [Len](https://godoc.org/github.com/RussellLuo/validating#Len)
+- [Gt](https://godoc.org/github.com/RussellLuo/validating#Gt)
+- [Gte](https://godoc.org/github.com/RussellLuo/validating#Gte)
+- [Lt](https://godoc.org/github.com/RussellLuo/validating#Lt)
+- [Lte](https://godoc.org/github.com/RussellLuo/validating#Lte)
+- [Range](https://godoc.org/github.com/RussellLuo/validating#Range)
+- [In](https://godoc.org/github.com/RussellLuo/validating#In)
+
+
 ## Examples
 
 - [Single field](examples/single-field/main.go)
@@ -62,7 +85,7 @@ This library borrows some ideas from the following libraries:
 [MIT][5]
 
 
-[1]: http://godoc.org/github.com/RussellLuo/validating
+[1]: https://godoc.org/github.com/RussellLuo/validating
 [2]: https://github.com/mholt/binding
 [3]: https://github.com/alecthomas/voluptuous
 [4]: https://github.com/go-validator/validator
