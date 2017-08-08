@@ -16,7 +16,8 @@ func (v *funcValidator) Validate(field Field) Errors {
 	return v.f(field)
 }
 
-// FromFunc creates a leaf validator from a function.
+// FromFunc is a leaf validator factory to create a validator, which will
+// delegate the actual validation to the given function f.
 func FromFunc(f validateFunc) Validator {
 	return &funcValidator{f}
 }
@@ -93,7 +94,7 @@ func Not(validator Validator, msgs ...string) Validator {
 }
 
 // Nested is a composite validator factory to create a validator, which will
-// delegate the validation work to its inner schema.
+// delegate the actual validation to its inner schema.
 func Nested(schema Schema) Validator {
 	return FromFunc(func(field Field) Errors {
 		nestedSchema := make(Schema, len(schema))
@@ -105,7 +106,7 @@ func Nested(schema Schema) Validator {
 }
 
 // NestedMulti is a composite validator factory to create a validator, which will
-// delegate the validation work to its inner multiple schemas, which are
+// delegate the actual validation to its inner multiple schemas, which are
 // returned by calling f.
 func NestedMulti(f func() []Schema) Validator {
 	schemas := f()
@@ -126,8 +127,8 @@ func NestedMulti(f func() []Schema) Validator {
 }
 
 // Lazy is a composite validator factory to create a validator, which will
-// call f only as needed, to delegate the validation work to
-// the actual validator returned by f.
+// call f only as needed, to delegate the actual validation to
+// the validator returned by f.
 func Lazy(f func() Validator) Validator {
 	return FromFunc(func(field Field) Errors {
 		return f().Validate(field)

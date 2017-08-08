@@ -55,10 +55,10 @@ Below are the built-in validator factories:
 1. From a boolean expression
 
     ```go
+    var value map[string]time.Time
     validator := v.Assert(value != nil, "is empty")
 
     // do validation
-    var value map[string]time.Time
     v.Validate(v.Schema{
         v.F("value", &value): validator,
     })
