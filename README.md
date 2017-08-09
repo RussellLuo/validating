@@ -52,9 +52,9 @@ Below are the built-in validator factories:
 
 ### Validator customizations
 
-1. [From a boolean expression](examples/nested-struct-pointer/main.go#L24)
-2. [From a function](examples/customizations#L32-L34)
-3. [From a struct](examples/customizations#L22-L26)
+- [From a boolean expression](examples/nested-struct-pointer/main.go#L24)
+- [From a function](examples/customizations/main.go#L32-L34)
+- [From a struct](examples/customizations/main.go#L22-L26)
 
 
 ## Examples
