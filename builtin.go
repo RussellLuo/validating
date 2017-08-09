@@ -252,7 +252,7 @@ func Nonzero(msgs ...string) Validator {
 		case *[]time.Duration:
 			valid = len(*t) != 0
 		default:
-			return NewErrors(field.Name, ErrUnrecognized, "of unrecognized type")
+			return NewErrors(field.Name, ErrUnrecognized, "of an unrecognized type")
 		}
 
 		if !valid {
@@ -408,7 +408,7 @@ func Gt(value interface{}, msgs ...string) Validator {
 // Gte is a leaf validator factory to create a validator, which will
 // succeed when the field's value is greater than or equal to the given value.
 func Gte(value interface{}, msgs ...string) Validator {
-	msg := getMsg("Gte", "is lower than give value", msgs...)
+	msg := getMsg("Gte", "is lower than given value", msgs...)
 	return FromFunc(func(field Field) Errors {
 		valid := false
 
@@ -468,14 +468,14 @@ func Gte(value interface{}, msgs ...string) Validator {
 // Lt is a leaf validator factory to create a validator, which will
 // succeed when the field's value is lower than the given value.
 func Lt(value interface{}, msgs ...string) Validator {
-	msg := getMsg("Lt", "is greater than or equal to give value", msgs...)
+	msg := getMsg("Lt", "is greater than or equal to given value", msgs...)
 	return not(Gte(value), "Lt", msg)
 }
 
 // Lte is a leaf validator factory to create a validator, which will
 // succeed when the field's value is lower than or equal to the given value.
 func Lte(value interface{}, msgs ...string) Validator {
-	msg := getMsg("Lte", "is greater than give value", msgs...)
+	msg := getMsg("Lte", "is greater than given value", msgs...)
 	return not(Gt(value), "Lte", msg)
 }
 

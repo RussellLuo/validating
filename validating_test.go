@@ -1,11 +1,12 @@
 package validating_test
 
 import (
+	"fmt"
+	"math"
 	"reflect"
 	"testing"
 	"time"
 
-	"fmt"
 	v "github.com/RussellLuo/validating"
 )
 
@@ -37,6 +38,20 @@ func makeErrsMap(errs v.Errors) map[string]v.Error {
 		formatted[err.Field()] = err
 	}
 	return formatted
+}
+
+func negateErrs(errs v.Errors, validatorName, fieldName, msg string) v.Errors {
+	if errs == nil {
+		return v.NewErrors(fieldName, v.ErrInvalid, msg)
+	}
+	switch errs[0].Kind() {
+	case v.ErrUnrecognized:
+		return errs
+	case v.ErrUnsupported:
+		return v.NewErrors(fieldName, v.ErrUnsupported, "cannot use validator `"+validatorName+"`")
+	default:
+		return nil
+	}
 }
 
 func TestAll(t *testing.T) {
@@ -429,8 +444,8 @@ func TestNonzero(t *testing.T) {
 		},
 		{
 			valuePtrMaker: func() interface{} {
-				inner := uint8(1)
-				value := &inner
+				temp := uint8(1)
+				value := &temp
 				return &value
 			},
 			errs: nil,
@@ -472,8 +487,8 @@ func TestNonzero(t *testing.T) {
 		},
 		{
 			valuePtrMaker: func() interface{} {
-				inner := uint16(1)
-				value := &inner
+				temp := uint16(1)
+				value := &temp
 				return &value
 			},
 			errs: nil,
@@ -515,8 +530,8 @@ func TestNonzero(t *testing.T) {
 		},
 		{
 			valuePtrMaker: func() interface{} {
-				inner := uint32(1)
-				value := &inner
+				temp := uint32(1)
+				value := &temp
 				return &value
 			},
 			errs: nil,
@@ -558,8 +573,8 @@ func TestNonzero(t *testing.T) {
 		},
 		{
 			valuePtrMaker: func() interface{} {
-				inner := uint64(1)
-				value := &inner
+				temp := uint64(1)
+				value := &temp
 				return &value
 			},
 			errs: nil,
@@ -601,8 +616,8 @@ func TestNonzero(t *testing.T) {
 		},
 		{
 			valuePtrMaker: func() interface{} {
-				inner := int8(1)
-				value := &inner
+				temp := int8(1)
+				value := &temp
 				return &value
 			},
 			errs: nil,
@@ -644,8 +659,8 @@ func TestNonzero(t *testing.T) {
 		},
 		{
 			valuePtrMaker: func() interface{} {
-				inner := int16(1)
-				value := &inner
+				temp := int16(1)
+				value := &temp
 				return &value
 			},
 			errs: nil,
@@ -687,8 +702,8 @@ func TestNonzero(t *testing.T) {
 		},
 		{
 			valuePtrMaker: func() interface{} {
-				inner := int32(1)
-				value := &inner
+				temp := int32(1)
+				value := &temp
 				return &value
 			},
 			errs: nil,
@@ -730,8 +745,8 @@ func TestNonzero(t *testing.T) {
 		},
 		{
 			valuePtrMaker: func() interface{} {
-				inner := int64(1)
-				value := &inner
+				temp := int64(1)
+				value := &temp
 				return &value
 			},
 			errs: nil,
@@ -773,8 +788,8 @@ func TestNonzero(t *testing.T) {
 		},
 		{
 			valuePtrMaker: func() interface{} {
-				inner := float32(1)
-				value := &inner
+				temp := float32(1)
+				value := &temp
 				return &value
 			},
 			errs: nil,
@@ -816,8 +831,8 @@ func TestNonzero(t *testing.T) {
 		},
 		{
 			valuePtrMaker: func() interface{} {
-				inner := float64(1)
-				value := &inner
+				temp := float64(1)
+				value := &temp
 				return &value
 			},
 			errs: nil,
@@ -859,8 +874,8 @@ func TestNonzero(t *testing.T) {
 		},
 		{
 			valuePtrMaker: func() interface{} {
-				inner := uint(1)
-				value := &inner
+				temp := uint(1)
+				value := &temp
 				return &value
 			},
 			errs: nil,
@@ -902,8 +917,8 @@ func TestNonzero(t *testing.T) {
 		},
 		{
 			valuePtrMaker: func() interface{} {
-				inner := int(1)
-				value := &inner
+				temp := int(1)
+				value := &temp
 				return &value
 			},
 			errs: nil,
@@ -945,8 +960,8 @@ func TestNonzero(t *testing.T) {
 		},
 		{
 			valuePtrMaker: func() interface{} {
-				inner := true
-				value := &inner
+				temp := true
+				value := &temp
 				return &value
 			},
 			errs: nil,
@@ -988,8 +1003,8 @@ func TestNonzero(t *testing.T) {
 		},
 		{
 			valuePtrMaker: func() interface{} {
-				inner := "a"
-				value := &inner
+				temp := "a"
+				value := &temp
 				return &value
 			},
 			errs: nil,
@@ -1031,8 +1046,8 @@ func TestNonzero(t *testing.T) {
 		},
 		{
 			valuePtrMaker: func() interface{} {
-				inner := time.Now()
-				value := &inner
+				temp := time.Now()
+				value := &temp
 				return &value
 			},
 			errs: nil,
@@ -1067,10 +1082,39 @@ func TestNonzero(t *testing.T) {
 		},
 		{
 			valuePtrMaker: func() interface{} {
+				value := (*time.Duration)(nil)
+				return &value
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "is zero valued"),
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				temp := time.Duration(1)
+				value := &temp
+				return &value
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := []time.Duration{}
+				return &value
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "is zero valued"),
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := []time.Duration{1}
+				return &value
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() interface{} {
 				value := func() {}
 				return &value
 			},
-			errs: v.NewErrors("value", v.ErrUnrecognized, "of unrecognized type"),
+			errs: v.NewErrors("value", v.ErrUnrecognized, "of an unrecognized type"),
 		},
 		{
 			valuePtrMaker: func() interface{} {
@@ -1084,6 +1128,2125 @@ func TestNonzero(t *testing.T) {
 	for _, c := range cases {
 		errs := v.Validate(v.Schema{
 			v.F("value", c.valuePtrMaker()): v.Nonzero(c.msgs...),
+		})
+		if !reflect.DeepEqual(makeErrsMap(errs), makeErrsMap(c.errs)) {
+			t.Errorf("Got (%+v) != Want (%+v)", errs, c.errs)
+		}
+	}
+}
+
+func TestLen(t *testing.T) {
+	cases := []struct {
+		valuePtrMaker func() interface{}
+		msgs          []string
+		errs          v.Errors
+	}{
+		{
+			valuePtrMaker: func() interface{} {
+				value := uint8(0)
+				return &value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Len`"),
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := (*uint8)(nil)
+				return &value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Len`"),
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := []uint8{}
+				return &value
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "with an invalid length"),
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := []uint8{1}
+				return &value
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := uint16(0)
+				return &value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Len`"),
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := (*uint16)(nil)
+				return &value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Len`"),
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := []uint16{}
+				return &value
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "with an invalid length"),
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := []uint16{1}
+				return &value
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := uint32(0)
+				return &value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Len`"),
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := (*uint32)(nil)
+				return &value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Len`"),
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := []uint32{}
+				return &value
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "with an invalid length"),
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := []uint32{1}
+				return &value
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := uint64(0)
+				return &value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Len`"),
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := (*uint64)(nil)
+				return &value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Len`"),
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := []uint64{}
+				return &value
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "with an invalid length"),
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := []uint64{1}
+				return &value
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := int8(0)
+				return &value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Len`"),
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := (*int8)(nil)
+				return &value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Len`"),
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := []int8{}
+				return &value
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "with an invalid length"),
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := []int8{1}
+				return &value
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := int16(0)
+				return &value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Len`"),
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := (*int16)(nil)
+				return &value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Len`"),
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := []int16{}
+				return &value
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "with an invalid length"),
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := []int16{1}
+				return &value
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := int32(0)
+				return &value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Len`"),
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := (*int32)(nil)
+				return &value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Len`"),
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := []int32{}
+				return &value
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "with an invalid length"),
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := []int32{1}
+				return &value
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := int64(0)
+				return &value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Len`"),
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := (*int64)(nil)
+				return &value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Len`"),
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := []int64{}
+				return &value
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "with an invalid length"),
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := []int64{1}
+				return &value
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := float32(0)
+				return &value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Len`"),
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := (*float32)(nil)
+				return &value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Len`"),
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := []float32{}
+				return &value
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "with an invalid length"),
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := []float32{1}
+				return &value
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := float64(0)
+				return &value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Len`"),
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := (*float64)(nil)
+				return &value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Len`"),
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := []float64{}
+				return &value
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "with an invalid length"),
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := []float64{1}
+				return &value
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := uint(0)
+				return &value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Len`"),
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := (*uint)(nil)
+				return &value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Len`"),
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := []uint{}
+				return &value
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "with an invalid length"),
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := []uint{1}
+				return &value
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := int(0)
+				return &value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Len`"),
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := (*int)(nil)
+				return &value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Len`"),
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := []int{}
+				return &value
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "with an invalid length"),
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := []int{1}
+				return &value
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := false
+				return &value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Len`"),
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := (*bool)(nil)
+				return &value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Len`"),
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := []bool{}
+				return &value
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "with an invalid length"),
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := []bool{true}
+				return &value
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := ""
+				return &value
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "with an invalid length"),
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := "a"
+				return &value
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := (*string)(nil)
+				return &value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Len`"),
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := []string{}
+				return &value
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "with an invalid length"),
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := []string{"a"}
+				return &value
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := time.Time{}
+				return &value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Len`"),
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := (*time.Time)(nil)
+				return &value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Len`"),
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := []time.Time{}
+				return &value
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "with an invalid length"),
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := []time.Time{time.Now()}
+				return &value
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := time.Duration(0)
+				return &value
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "with an invalid length"),
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := time.Duration(1)
+				return &value
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := (*time.Duration)(nil)
+				return &value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Len`"),
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := []time.Duration{}
+				return &value
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "with an invalid length"),
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := []time.Duration{1}
+				return &value
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := func() {}
+				return &value
+			},
+			errs: v.NewErrors("value", v.ErrUnrecognized, "of an unrecognized type"),
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := []int{}
+				return &value
+			},
+			msgs: []string{"is not ok"},
+			errs: v.NewErrors("value", v.ErrInvalid, "is not ok"),
+		},
+	}
+	for _, c := range cases {
+		errs := v.Validate(v.Schema{
+			v.F("value", c.valuePtrMaker()): v.Len(1, math.MaxInt64, c.msgs...),
+		})
+		if !reflect.DeepEqual(makeErrsMap(errs), makeErrsMap(c.errs)) {
+			t.Errorf("Got (%+v) != Want (%+v)", errs, c.errs)
+		}
+	}
+}
+
+func TestGt_Lte(t *testing.T) {
+	cases := []struct {
+		valuePtrMaker func() (interface{}, interface{})
+		msgs          []string
+		errs          v.Errors
+	}{
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := uint8(0)
+				other := uint8(1)
+				return &value, other
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "is lower than or equal to given value"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := uint8(2)
+				other := uint8(1)
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := (*uint8)(nil)
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gt`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := []uint8{}
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gt`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := uint16(0)
+				other := uint16(1)
+				return &value, other
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "is lower than or equal to given value"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := uint16(2)
+				other := uint16(1)
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := (*uint16)(nil)
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gt`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := []uint16{}
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gt`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := uint32(0)
+				other := uint32(1)
+				return &value, other
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "is lower than or equal to given value"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := uint32(2)
+				other := uint32(1)
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := (*uint32)(nil)
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gt`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := []uint32{}
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gt`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := uint64(0)
+				other := uint64(1)
+				return &value, other
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "is lower than or equal to given value"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := uint64(2)
+				other := uint64(1)
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := (*uint64)(nil)
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gt`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := []uint64{}
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gt`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := int8(0)
+				other := int8(1)
+				return &value, other
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "is lower than or equal to given value"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := int8(2)
+				other := int8(1)
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := (*int8)(nil)
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gt`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := []int8{}
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gt`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := int16(0)
+				other := int16(1)
+				return &value, other
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "is lower than or equal to given value"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := int16(2)
+				other := int16(1)
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := (*int16)(nil)
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gt`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := []int16{}
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gt`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := int32(0)
+				other := int32(1)
+				return &value, other
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "is lower than or equal to given value"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := int32(2)
+				other := int32(1)
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := (*int32)(nil)
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gt`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := []int32{}
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gt`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := int64(0)
+				other := int64(1)
+				return &value, other
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "is lower than or equal to given value"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := int64(2)
+				other := int64(1)
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := (*int64)(nil)
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gt`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := []int64{}
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gt`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := float32(0)
+				other := float32(1)
+				return &value, other
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "is lower than or equal to given value"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := float32(2)
+				other := float32(1)
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := (*float32)(nil)
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gt`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := []float32{}
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gt`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := float64(0)
+				other := float64(1)
+				return &value, other
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "is lower than or equal to given value"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := float64(2)
+				other := float64(1)
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := (*float64)(nil)
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gt`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := []float64{}
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gt`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := uint(0)
+				other := uint(1)
+				return &value, other
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "is lower than or equal to given value"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := uint(2)
+				other := uint(1)
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := (*uint)(nil)
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gt`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := []uint{}
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gt`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := int(0)
+				other := int(1)
+				return &value, other
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "is lower than or equal to given value"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := int(2)
+				other := int(1)
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := (*int)(nil)
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gt`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := []int{}
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gt`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := false
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gt`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := (*bool)(nil)
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gt`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := []bool{}
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gt`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := ""
+				other := "a"
+				return &value, other
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "is lower than or equal to given value"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := "a"
+				other := ""
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := (*string)(nil)
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gt`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := []string{}
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gt`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := time.Time{}
+				other := time.Now()
+				return &value, other
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "is lower than or equal to given value"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := time.Now()
+				other := time.Time{}
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := (*time.Time)(nil)
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gt`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := []time.Time{}
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gt`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := time.Duration(0)
+				other := time.Duration(1)
+				return &value, other
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "is lower than or equal to given value"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := time.Duration(2)
+				other := time.Duration(1)
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := (*time.Duration)(nil)
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gt`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := []time.Duration{}
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gt`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := func() {}
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnrecognized, "of an unrecognized type"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := int(0)
+				other := int(1)
+				return &value, other
+			},
+			msgs: []string{"is not ok"},
+			errs: v.NewErrors("value", v.ErrInvalid, "is not ok"),
+		},
+	}
+	for _, c := range cases {
+		valuePtr, other := c.valuePtrMaker()
+
+		// Test Gt
+		errs := v.Validate(v.Schema{
+			v.F("value", valuePtr): v.Gt(other, c.msgs...),
+		})
+		if !reflect.DeepEqual(makeErrsMap(errs), makeErrsMap(c.errs)) {
+			t.Errorf("Got (%+v) != Want (%+v)", errs, c.errs)
+		}
+
+		// Test Lte
+		negativeWantErrs := negateErrs(c.errs, "Lte", "value", "is greater than given value")
+		errs = v.Validate(v.Schema{
+			v.F("value", valuePtr): v.Lte(other, c.msgs...),
+		})
+		if !reflect.DeepEqual(makeErrsMap(errs), makeErrsMap(negativeWantErrs)) {
+			t.Errorf("Got (%+v) != Want (%+v)", errs, c.errs)
+		}
+	}
+}
+
+func TestGte_Lt(t *testing.T) {
+	cases := []struct {
+		valuePtrMaker func() (interface{}, interface{})
+		msgs          []string
+		errs          v.Errors
+	}{
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := uint8(0)
+				other := uint8(1)
+				return &value, other
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "is lower than given value"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := uint8(1)
+				other := uint8(0)
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := uint8(1)
+				other := uint8(1)
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := (*uint8)(nil)
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gte`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := []uint8{}
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gte`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := uint16(0)
+				other := uint16(1)
+				return &value, other
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "is lower than given value"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := uint16(1)
+				other := uint16(0)
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := uint16(1)
+				other := uint16(1)
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := (*uint16)(nil)
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gte`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := []uint16{}
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gte`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := uint32(0)
+				other := uint32(1)
+				return &value, other
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "is lower than given value"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := uint32(1)
+				other := uint32(0)
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := uint32(1)
+				other := uint32(1)
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := (*uint32)(nil)
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gte`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := []uint32{}
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gte`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := uint64(0)
+				other := uint64(1)
+				return &value, other
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "is lower than given value"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := uint64(1)
+				other := uint64(0)
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := uint64(1)
+				other := uint64(1)
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := (*uint64)(nil)
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gte`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := []uint64{}
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gte`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := int8(0)
+				other := int8(1)
+				return &value, other
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "is lower than given value"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := int8(1)
+				other := int8(0)
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := int8(1)
+				other := int8(1)
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := (*int8)(nil)
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gte`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := []int8{}
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gte`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := int16(0)
+				other := int16(1)
+				return &value, other
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "is lower than given value"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := int16(1)
+				other := int16(0)
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := int16(1)
+				other := int16(1)
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := (*int16)(nil)
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gte`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := []int16{}
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gte`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := int32(0)
+				other := int32(1)
+				return &value, other
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "is lower than given value"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := int32(1)
+				other := int32(0)
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := int32(1)
+				other := int32(1)
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := (*int32)(nil)
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gte`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := []int32{}
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gte`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := int64(0)
+				other := int64(1)
+				return &value, other
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "is lower than given value"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := int64(1)
+				other := int64(0)
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := int64(1)
+				other := int64(1)
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := (*int64)(nil)
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gte`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := []int64{}
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gte`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := float32(0)
+				other := float32(1)
+				return &value, other
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "is lower than given value"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := float32(1)
+				other := float32(0)
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := float32(1)
+				other := float32(1)
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := (*float32)(nil)
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gte`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := []float32{}
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gte`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := float64(0)
+				other := float64(1)
+				return &value, other
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "is lower than given value"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := float64(1)
+				other := float64(0)
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := float64(1)
+				other := float64(1)
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := (*float64)(nil)
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gte`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := []float64{}
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gte`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := uint(0)
+				other := uint(1)
+				return &value, other
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "is lower than given value"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := uint(1)
+				other := uint(0)
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := uint(1)
+				other := uint(1)
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := (*uint)(nil)
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gte`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := []uint{}
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gte`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := int(0)
+				other := int(1)
+				return &value, other
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "is lower than given value"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := int(1)
+				other := int(0)
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := int(1)
+				other := int(1)
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := (*int)(nil)
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gte`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := []int{}
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gte`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := false
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gte`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := (*bool)(nil)
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gte`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := []bool{}
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gte`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := ""
+				other := "a"
+				return &value, other
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "is lower than given value"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := "a"
+				other := ""
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := "a"
+				other := "a"
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := (*string)(nil)
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gte`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := []string{}
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gte`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := time.Time{}
+				other := time.Now()
+				return &value, other
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "is lower than given value"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := time.Now()
+				other := time.Time{}
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := time.Time{}
+				other := time.Time{}
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := (*time.Time)(nil)
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gte`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := []time.Time{}
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gte`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := time.Duration(0)
+				other := time.Duration(1)
+				return &value, other
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "is lower than given value"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := time.Duration(1)
+				other := time.Duration(0)
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := time.Duration(1)
+				other := time.Duration(1)
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := (*time.Duration)(nil)
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gte`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := []time.Duration{}
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Gte`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := func() {}
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnrecognized, "of an unrecognized type"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := int(0)
+				other := int(1)
+				return &value, other
+			},
+			msgs: []string{"is not ok"},
+			errs: v.NewErrors("value", v.ErrInvalid, "is not ok"),
+		},
+	}
+	for _, c := range cases {
+		valuePtr, other := c.valuePtrMaker()
+
+		// Test Gte
+		errs := v.Validate(v.Schema{
+			v.F("value", valuePtr): v.Gte(other, c.msgs...),
+		})
+		if !reflect.DeepEqual(makeErrsMap(errs), makeErrsMap(c.errs)) {
+			t.Errorf("Got (%+v) != Want (%+v)", errs, c.errs)
+		}
+
+		// Test Lt
+		negativeWantErrs := negateErrs(c.errs, "Lt", "value", "is greater than or equal to given value")
+		errs = v.Validate(v.Schema{
+			v.F("value", valuePtr): v.Lt(other, c.msgs...),
+		})
+		if !reflect.DeepEqual(makeErrsMap(errs), makeErrsMap(negativeWantErrs)) {
+			t.Errorf("Got (%+v) != Want (%+v)", errs, c.errs)
+		}
+	}
+}
+
+func TestIn(t *testing.T) {
+	cases := []struct {
+		valuePtrMaker func() (interface{}, []interface{})
+		msgs          []string
+		errs          v.Errors
+	}{
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := uint8(0)
+				return &value, []interface{}{uint8(1), uint8(2)}
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "is not one of given values"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := uint8(1)
+				return &value, []interface{}{uint8(1), uint8(2)}
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := (*uint8)(nil)
+				return &value, nil
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `In`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := []uint8{}
+				return &value, nil
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `In`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := uint16(0)
+				return &value, []interface{}{uint16(1), uint16(2)}
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "is not one of given values"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := uint16(1)
+				return &value, []interface{}{uint16(1), uint16(2)}
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := (*uint16)(nil)
+				return &value, nil
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `In`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := []uint16{}
+				return &value, nil
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `In`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := uint32(0)
+				return &value, []interface{}{uint32(1), uint32(2)}
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "is not one of given values"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := uint32(1)
+				return &value, []interface{}{uint32(1), uint32(2)}
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := (*uint32)(nil)
+				return &value, nil
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `In`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := []uint32{}
+				return &value, nil
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `In`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := uint64(0)
+				return &value, []interface{}{uint64(1), uint64(2)}
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "is not one of given values"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := uint64(1)
+				return &value, []interface{}{uint64(1), uint64(2)}
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := (*uint64)(nil)
+				return &value, nil
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `In`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := []uint64{}
+				return &value, nil
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `In`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := int8(0)
+				return &value, []interface{}{int8(1), int8(2)}
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "is not one of given values"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := int8(1)
+				return &value, []interface{}{int8(1), int8(2)}
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := (*int8)(nil)
+				return &value, nil
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `In`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := []int8{}
+				return &value, nil
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `In`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := int16(0)
+				return &value, []interface{}{int16(1), int16(2)}
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "is not one of given values"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := int16(1)
+				return &value, []interface{}{int16(1), int16(2)}
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := (*int16)(nil)
+				return &value, nil
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `In`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := []int16{}
+				return &value, nil
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `In`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := int32(0)
+				return &value, []interface{}{int32(1), int32(2)}
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "is not one of given values"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := int32(1)
+				return &value, []interface{}{int32(1), int32(2)}
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := (*int32)(nil)
+				return &value, nil
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `In`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := []int32{}
+				return &value, nil
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `In`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := int64(0)
+				return &value, []interface{}{int64(1), int64(2)}
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "is not one of given values"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := int64(1)
+				return &value, []interface{}{int64(1), int64(2)}
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := (*int64)(nil)
+				return &value, nil
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `In`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := []int64{}
+				return &value, nil
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `In`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := float32(0)
+				return &value, []interface{}{float32(1), float32(2)}
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "is not one of given values"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := float32(1)
+				return &value, []interface{}{float32(1), float32(2)}
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := (*float32)(nil)
+				return &value, nil
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `In`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := []float32{}
+				return &value, nil
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `In`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := float64(0)
+				return &value, []interface{}{float64(1), float64(2)}
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "is not one of given values"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := float64(1)
+				return &value, []interface{}{float64(1), float64(2)}
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := (*float64)(nil)
+				return &value, nil
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `In`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := []float64{}
+				return &value, nil
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `In`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := uint(0)
+				return &value, []interface{}{uint(1), uint(2)}
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "is not one of given values"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := uint(1)
+				return &value, []interface{}{uint(1), uint(2)}
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := (*uint)(nil)
+				return &value, nil
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `In`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := []uint{}
+				return &value, nil
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `In`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := int(0)
+				return &value, []interface{}{int(1), int(2)}
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "is not one of given values"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := int(1)
+				return &value, []interface{}{int(1), int(2)}
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := (*int)(nil)
+				return &value, nil
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `In`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := []int{}
+				return &value, nil
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `In`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := false
+				return &value, []interface{}{true}
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "is not one of given values"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := true
+				return &value, []interface{}{true}
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := (*bool)(nil)
+				return &value, nil
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `In`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := []bool{}
+				return &value, nil
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `In`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := ""
+				return &value, []interface{}{"a", "ab"}
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "is not one of given values"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := "a"
+				return &value, []interface{}{"a", "ab"}
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := (*string)(nil)
+				return &value, nil
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `In`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := []string{}
+				return &value, nil
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `In`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := time.Time{}
+				return &value, []interface{}{time.Now()}
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "is not one of given values"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := time.Time{}
+				return &value, []interface{}{value}
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := (*time.Time)(nil)
+				return &value, nil
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `In`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := []time.Time{}
+				return &value, nil
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `In`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := time.Duration(0)
+				return &value, []interface{}{time.Duration(1), time.Duration(2)}
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "is not one of given values"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := time.Duration(1)
+				return &value, []interface{}{time.Duration(1), time.Duration(2)}
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := (*time.Duration)(nil)
+				return &value, nil
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `In`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := []time.Duration{}
+				return &value, nil
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `In`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := func() {}
+				return &value, nil
+			},
+			errs: v.NewErrors("value", v.ErrUnrecognized, "of an unrecognized type"),
+		},
+	}
+	for _, c := range cases {
+		valuePtr, others := c.valuePtrMaker()
+		errs := v.Validate(v.Schema{
+			v.F("value", valuePtr): v.In(others...),
 		})
 		if !reflect.DeepEqual(makeErrsMap(errs), makeErrsMap(c.errs)) {
 			t.Errorf("Got (%+v) != Want (%+v)", errs, c.errs)
