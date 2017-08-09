@@ -52,65 +52,9 @@ Below are the built-in validator factories:
 
 ### Validator customizations
 
-1. From a boolean expression
-
-    ```go
-    var value map[string]time.Time
-    validator := v.Assert(value != nil, "is empty")
-
-    // do validation
-    v.Validate(v.Schema{
-        v.F("value", &value): validator,
-    })
-    ```
-
-2. From a function
-
-    ```go
-	validator := v.FromFunc(func(field Field) Errors {
-		switch t := field.ValuePtr.(type) {
-		case *map[string]time.Time:
-		    if *t == nil {
-		        return v.NewErrors(field.Name, v.ErrInvalid, "is empty")
-		    }
-		    return nil
-		default:
-		    return v.NewErrors(field.Name, v.ErrUnsupported, "is unsupported")
-		}
-	})
-
-    // do validation
-    var value map[string]time.Time
-    v.Validate(v.Schema{
-        v.F("value", &value): validator,
-    })
-    ```
-
-3. From a struct
-
-    ```go
-    type MyValidator struct{}
-
-    func (mv *MyValidator) Validate(field Field) Errors {
-		switch t := field.ValuePtr.(type) {
-		case *map[string]time.Time:
-		    if *t == nil {
-		        return v.NewErrors(field.Name, v.ErrInvalid, "is empty")
-		    }
-		    return nil
-		default:
-		    return v.NewErrors(field.Name, v.ErrUnsupported, "is unsupported")
-		}
-    }
-
-    validator := &MyValidator{}
-
-    // do validation
-    var value map[string]time.Time
-    v.Validate(v.Schema{
-        v.F("value", &value): validator,
-    })
-    ```
+1. [From a boolean expression](examples/nested-struct-pointer/main.go#L24)
+2. [From a function](examples/customizations#L32-L34)
+3. [From a struct](examples/customizations#L22-L26)
 
 
 ## Examples
