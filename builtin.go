@@ -247,6 +247,10 @@ func Nonzero(msgs ...string) Validator {
 			valid = len(*t) != 0
 		case *time.Duration:
 			valid = *t != 0
+		case **time.Duration:
+			valid = *t != nil
+		case *[]time.Duration:
+			valid = len(*t) != 0
 		default:
 			return NewErrors(field.Name, ErrUnrecognized, "of unrecognized type")
 		}
@@ -274,7 +278,8 @@ func Len(min, max int, msgs ...string) Validator {
 			*uint, **uint, *int, **int,
 			*bool, **bool,
 			**string,
-			*time.Time, **time.Time:
+			*time.Time, **time.Time,
+			**time.Duration:
 			return NewErrors(field.Name, ErrUnsupported, "cannot use validator `Len`")
 		case *[]uint8:
 			l := len(*t)
@@ -326,6 +331,9 @@ func Len(min, max int, msgs ...string) Validator {
 			valid = l >= min && l <= max
 		case *time.Duration:
 			valid = *t >= time.Duration(min) && *t <= time.Duration(max)
+		case *[]time.Duration:
+			l := len(*t)
+			valid = l >= min && l <= max
 		default:
 			return NewErrors(field.Name, ErrUnrecognized, "of an unrecognized type")
 		}
@@ -353,7 +361,8 @@ func Gt(value interface{}, msgs ...string) Validator {
 			**uint, *[]uint, **int, *[]int,
 			*bool, **bool, *[]bool,
 			**string, *[]string,
-			**time.Time, *[]time.Time:
+			**time.Time, *[]time.Time,
+			**time.Duration, *[]time.Duration:
 			return NewErrors(field.Name, ErrUnsupported, "cannot use validator `Gt`")
 		case *uint8:
 			valid = *t > value.(uint8)
@@ -412,7 +421,8 @@ func Gte(value interface{}, msgs ...string) Validator {
 			**uint, *[]uint, **int, *[]int,
 			*bool, **bool, *[]bool,
 			**string, *[]string,
-			**time.Time, *[]time.Time:
+			**time.Time, *[]time.Time,
+			**time.Duration, *[]time.Duration:
 			return NewErrors(field.Name, ErrUnsupported, "cannot use validator `Gte`")
 		case *uint8:
 			valid = *t >= value.(uint8)
@@ -491,7 +501,8 @@ func In(values ...interface{}) Validator {
 			**uint, *[]uint, **int, *[]int,
 			**bool, *[]bool,
 			**string, *[]string,
-			**time.Time, *[]time.Time:
+			**time.Time, *[]time.Time,
+			**time.Duration, *[]time.Duration:
 			return NewErrors(field.Name, ErrUnsupported, "cannot use validator `In`")
 		case *uint8:
 			for _, value := range values {
