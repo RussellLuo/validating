@@ -23,6 +23,14 @@ A Go library for validating structs and fields.
 4. No reflection
 
 
+## Installation
+
+
+```bash
+$ go get github.com/RussellLuo/validating
+```
+
+
 ## Validator factories and validators
 
 To be strict, this library has a conceptual distinction between `validator factory` and `validator`.
@@ -30,8 +38,6 @@ To be strict, this library has a conceptual distinction between `validator facto
 A validator factory is a function to create a validator, which will do the actual validation.
 
 ### Built-in validator factories
-
-Below are the built-in validator factories:
 
 - [FromFunc](https://godoc.org/github.com/RussellLuo/validating#FromFunc)
 - [All/And](https://godoc.org/github.com/RussellLuo/validating#All)
