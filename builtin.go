@@ -263,7 +263,7 @@ func Nonzero(msgs ...string) Validator {
 }
 
 // Len is a leaf validator factory to create a validator, which will
-// succeed when the field's value is between min and max.
+// succeed when the field's length is between min and max.
 func Len(min, max int, msgs ...string) Validator {
 	msg := getMsg("Len", "with an invalid length", msgs...)
 	return FromFunc(func(field Field) Errors {
