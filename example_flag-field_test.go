@@ -1,4 +1,4 @@
-package main
+package validating_test
 
 import (
 	"flag"
@@ -7,7 +7,10 @@ import (
 	v "github.com/RussellLuo/validating"
 )
 
-func main() {
+func Example_flagField() {
+	// import "flag"
+	// import v "github.com/RussellLuo/validating
+
 	value := flag.String("value", "", "Value argument")
 	flag.Parse()
 
@@ -15,4 +18,7 @@ func main() {
 		v.F("value", value): v.All(v.Nonzero(), v.Len(2, 5)),
 	})
 	fmt.Printf("err: %+v\n", err)
+
+	// Output:
+	// err: value: INVALID(is zero valued)
 }
