@@ -4,11 +4,12 @@ import (
 	"time"
 )
 
-// FromFunc is an adapter to allow to convert any func(Field) Errors
-// into a Validator. If f is a function with the appropriate signature,
+// FromFunc is an adapter to allow the use of ordinary functions as
+// validators. If f is a function with the appropriate signature,
 // FromFunc(f) is a Validator that calls f.
 type FromFunc func(field Field) Errors
 
+// Validate calls f(field).
 func (f FromFunc) Validate(field Field) Errors {
 	return f(field)
 }
