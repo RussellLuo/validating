@@ -6,13 +6,13 @@ import (
 	v "github.com/RussellLuo/validating"
 )
 
-type Person struct {
+type Person1 struct {
 	Name string
 	Age  int
 }
 
 func Example_simpleStruct() {
-	p := Person{}
+	p := Person1{}
 	err := v.Validate(v.Schema{
 		v.F("name", &p.Name): v.Len(1, 5, "length is not between 1 and 5"),
 		v.F("age", &p.Age):   v.Nonzero(),

@@ -1,4 +1,4 @@
-package main
+package validating_test
 
 import (
 	"fmt"
@@ -10,14 +10,14 @@ type Address struct {
 	Country, Province, City string
 }
 
-type Person struct {
+type Person2 struct {
 	Name    string
 	Age     int
 	Address Address
 }
 
-func main() {
-	p := Person{}
+func Example_nestedStruct() {
+	p := Person2{}
 	err := v.Validate(v.Schema{
 		v.F("name", &p.Name): v.Len(1, 5),
 		v.F("age", &p.Age):   v.Gte(10),
