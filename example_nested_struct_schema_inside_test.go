@@ -1,4 +1,4 @@
-package main
+package validating_test
 
 import (
 	"fmt"
@@ -32,7 +32,7 @@ func (p *Person) Schema() v.Schema {
 	}
 }
 
-func main() {
+func Example_nestedStruct_schemaInside() {
 	p := Person{}
 	err := v.Validate(p.Schema())
 	fmt.Printf("err: %+v\n", err)
