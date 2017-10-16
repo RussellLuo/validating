@@ -65,9 +65,9 @@ A validator factory is a function to create a validator, which will do the actua
 
 ## Examples
 
-- [Single field](examples/single-field/main.go)
-- [Flag field](examples/flag-field/main.go)
-- [Simple struct](examples/simple-struct/main.go)
+- [Single field](example_single-field_test.go)
+- [Flag field](example_flag-field_test.go)
+- [Simple struct](example_simple-struct_test.go)
 - [Nested struct](examples/nested-struct/main.go)
 - [Nested struct (schema inside)](examples/nested-struct-schema-inside/main.go)
 - [Nested struct pointer](examples/nested-struct-pointer/main.go)
