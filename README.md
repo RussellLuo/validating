@@ -58,21 +58,21 @@ A validator factory is a function to create a validator, which will do the actua
 
 ### Validator customizations
 
-- [From a boolean expression](examples/nested-struct-pointer/main.go#L24)
-- [From a function](examples/customizations/main.go#L32-L34)
-- [From a struct](examples/customizations/main.go#L22-L26)
+- [From a boolean expression](example_nested_struct_pointer_test.go#L24)
+- [From a function](example_customizations_test.go#L32-L34)
+- [From a struct](example_customizations_test.go#L22-L26)
 
 
 ## Examples
 
-- [Single field](example_single-field_test.go)
-- [Flag field](example_flag-field_test.go)
-- [Simple struct](example_simple-struct_test.go)
-- [Nested struct](examples/nested-struct/main.go)
-- [Nested struct (schema inside)](examples/nested-struct-schema-inside/main.go)
-- [Nested struct pointer](examples/nested-struct-pointer/main.go)
-- [Nested struct slice](examples/nested-struct-slice/main.go)
-- [Nested struct map](examples/nested-struct-map/main.go)
+- [Single field](example_single_field_test.go)
+- [Flag field](example_flag_field_test.go)
+- [Simple struct](example_simple_struct_test.go)
+- [Nested struct](example_nested_struct_test.go)
+- [Nested struct (schema inside)](example_nested_struct_schema_inside_test.go)
+- [Nested struct pointer](example_nested_struct_pointer_test.go)
+- [Nested struct slice](example_nested_struct_slice_test.go)
+- [Nested struct map](example_nested_struct_map_test.go)
 
 
 ## Documentation
