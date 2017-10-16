@@ -9,7 +9,8 @@ import (
 
 func Example_flagField() {
 	// import "flag"
-	// import v "github.com/RussellLuo/validating
+	// import "fmt"
+	// import v "github.com/RussellLuo/validating"
 
 	value := flag.String("value", "", "Value argument")
 	flag.Parse()

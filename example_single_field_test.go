@@ -7,13 +7,15 @@ import (
 )
 
 func Example_singleField() {
-	// Package "validating" imported as "v"
+	// import "fmt"
+	// import v "github.com/RussellLuo/validating"
 
 	value := 0
 	err := v.Validate(v.Schema{
 		v.F("value", &value): v.Range(1, 5),
 	})
 	fmt.Printf("err: %+v\n", err)
+
 	// Output:
 	// err: value: INVALID(is not between given range)
 }

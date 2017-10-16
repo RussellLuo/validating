@@ -6,18 +6,18 @@ import (
 	v "github.com/RussellLuo/validating"
 )
 
-type Address struct {
+type Address1 struct {
 	Country, Province, City string
 }
 
-type Person2 struct {
+type Person1 struct {
 	Name    string
 	Age     int
-	Address Address
+	Address Address1
 }
 
 func Example_nestedStruct() {
-	p := Person2{}
+	p := Person1{}
 	err := v.Validate(v.Schema{
 		v.F("name", &p.Name): v.Len(1, 5),
 		v.F("age", &p.Age):   v.Gte(10),
