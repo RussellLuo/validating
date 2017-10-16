@@ -4,22 +4,13 @@ import (
 	"time"
 )
 
-// validateFunc represents a prototype of the validator's Validate function.
-type validateFunc func(field Field) Errors
+// FromFunc is an adapter to allow to convert any func(Field) Errors
+// into a Validator. If f is a function with the appropriate signature,
+// FromFunc(f) is a Validator that calls f.
+type FromFunc func(field Field) Errors
 
-// funcValidator is a validator which is made from a function.
-type funcValidator struct {
-	f validateFunc
-}
-
-func (v *funcValidator) Validate(field Field) Errors {
-	return v.f(field)
-}
-
-// FromFunc is a leaf validator factory to create a validator, which will
-// delegate the actual validation to the given function f.
-func FromFunc(f validateFunc) Validator {
-	return &funcValidator{f}
+func (f FromFunc) Validate(field Field) Errors {
+	return f(field)
 }
 
 func getMsg(validatorName, defaultMsg string, msgs ...string) string {
