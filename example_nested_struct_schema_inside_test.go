@@ -6,11 +6,11 @@ import (
 	v "github.com/RussellLuo/validating"
 )
 
-type Address struct {
+type Address2 struct {
 	Country, Province, City string
 }
 
-func (a *Address) Schema() v.Schema {
+func (a *Address2) Schema() v.Schema {
 	return v.Schema{
 		v.F("country", &a.Country):  v.Nonzero(),
 		v.F("province", &a.Country): v.Nonzero(),
@@ -18,13 +18,13 @@ func (a *Address) Schema() v.Schema {
 	}
 }
 
-type Person struct {
+type Person2 struct {
 	Name    string
 	Age     int
-	Address Address
+	Address Address2
 }
 
-func (p *Person) Schema() v.Schema {
+func (p *Person2) Schema() v.Schema {
 	return v.Schema{
 		v.F("name", &p.Name):       v.Len(1, 5),
 		v.F("age", &p.Age):         v.Gte(10),
@@ -32,8 +32,8 @@ func (p *Person) Schema() v.Schema {
 	}
 }
 
-func Example_nestedStruct_schemaInside() {
-	p := Person{}
+func Example_nestedStructSchemaInside() {
+	p := Person2{}
 	err := v.Validate(p.Schema())
 	fmt.Printf("err: %+v\n", err)
 }
