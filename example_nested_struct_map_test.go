@@ -10,13 +10,13 @@ type Member struct {
 	Name string
 }
 
-type Person struct {
+type Person1 struct {
 	Name   string
 	Age    int
 	Family map[string]*Member
 }
 
-func makeSchema(p *Person) v.Schema {
+func makeSchema1(p *Person1) v.Schema {
 	return v.Schema{
 		v.F("name", &p.Name): v.Len(1, 5),
 		v.F("age", &p.Age):   v.Nonzero(),
@@ -35,14 +35,14 @@ func makeSchema(p *Person) v.Schema {
 }
 
 func Example_nestedStructMap() {
-	p1 := Person{}
-	err := v.Validate(makeSchema(&p1))
+	p1 := Person1{}
+	err := v.Validate(makeSchema1(&p1))
 	fmt.Printf("err of p1: %+v\n", err)
 
-	p2 := Person{Family: map[string]*Member{
+	p2 := Person1{Family: map[string]*Member{
 		"father": {"father's name"},
 		"mother": {"mother's name is long"},
 	}}
-	err = v.Validate(makeSchema(&p2))
+	err = v.Validate(makeSchema1(&p2))
 	fmt.Printf("err of p2: %+v\n", err)
 }

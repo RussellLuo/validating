@@ -1,4 +1,4 @@
-package main
+package validating_test
 
 import (
 	"fmt"
@@ -25,7 +25,7 @@ func (mv *MyValidator) Validate(field v.Field) v.Errors {
 	return validate(field)
 }
 
-func main() {
+func Example_customizations() {
 	var value map[string]time.Time
 
 	// do validation by funcValidator

@@ -1,4 +1,4 @@
-package main
+package validating_test
 
 import (
 	"fmt"
@@ -10,13 +10,13 @@ type Phone struct {
 	Number, Remark string
 }
 
-type Person struct {
+type Person4 struct {
 	Name   string
 	Age    int
 	Phones []*Phone
 }
 
-func makeSchema(p *Person) v.Schema {
+func makeSchema4(p *Person4) v.Schema {
 	return v.Schema{
 		v.F("name", &p.Name): v.Len(1, 5),
 		v.F("age", &p.Age):   v.Nonzero(),
@@ -35,15 +35,15 @@ func makeSchema(p *Person) v.Schema {
 	}
 }
 
-func main() {
-	p1 := Person{}
-	err := v.Validate(makeSchema(&p1))
+func Example_nestedStructSlice() {
+	p1 := Person4{}
+	err := v.Validate(makeSchema4(&p1))
 	fmt.Printf("err of p1: %+v\n", err)
 
-	p2 := Person{Phones: []*Phone{
+	p2 := Person4{Phones: []*Phone{
 		{"13011112222", "private"},
 		{"13033334444", "business"},
 	}}
-	err = v.Validate(makeSchema(&p2))
+	err = v.Validate(makeSchema4(&p2))
 	fmt.Printf("err of p2: %+v\n", err)
 }

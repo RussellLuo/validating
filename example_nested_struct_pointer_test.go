@@ -1,4 +1,4 @@
-package main
+package validating_test
 
 import (
 	"fmt"
@@ -6,17 +6,17 @@ import (
 	v "github.com/RussellLuo/validating"
 )
 
-type Address struct {
+type Address2 struct {
 	Country, Province, City string
 }
 
-type Person struct {
+type Person2 struct {
 	Name    string
 	Age     int
-	Address *Address
+	Address *Address2
 }
 
-func makeSchema(p *Person) v.Schema {
+func makeSchema2(p *Person2) v.Schema {
 	return v.Schema{
 		v.F("name", &p.Name): v.Len(1, 5),
 		v.F("age", &p.Age):   v.Lte(50),
@@ -33,12 +33,12 @@ func makeSchema(p *Person) v.Schema {
 	}
 }
 
-func main() {
-	p1 := Person{}
-	err := v.Validate(makeSchema(&p1))
+func Example_nestedStructPointer() {
+	p1 := Person2{}
+	err := v.Validate(makeSchema2(&p1))
 	fmt.Printf("err of p1: %+v\n", err)
 
-	p2 := Person{Age: 60, Address: &Address{}}
-	err = v.Validate(makeSchema(&p2))
+	p2 := Person2{Age: 60, Address: &Address2{}}
+	err = v.Validate(makeSchema2(&p2))
 	fmt.Printf("err of p2: %+v\n", err)
 }
