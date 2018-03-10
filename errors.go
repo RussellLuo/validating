@@ -33,6 +33,25 @@ func (e *Errors) Extend(errs Errors) {
 	*e = append(*e, errs...)
 }
 
+// HasField will return if errors contains field
+func (e Errors) HasField(name string) bool {
+	for _, err := range e {
+		if err.Field() == name {
+			return true
+		}
+	}
+	return false
+}
+
+// JSONErrors transform errors to json usable format
+func (e Errors) JSONErrors() *map[string][]string {
+	jsons := make(map[string][]string)
+	for _, err := range e {
+		jsons[err.Field()] = append(jsons[err.Field()], err.Message())
+	}
+	return &jsons
+}
+
 func (e Errors) Error() string {
 	strs := make([]string, len(e))
 	for i, err := range e {
