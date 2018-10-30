@@ -2,6 +2,7 @@ package validating
 
 import (
 	"time"
+	"unicode/utf8"
 )
 
 // FromFunc is an adapter to allow the use of ordinary functions as
@@ -313,7 +314,7 @@ func Len(min, max int, msgs ...string) Validator {
 			l := len(*t)
 			valid = l >= min && l <= max
 		case *string:
-			l := len(*t)
+			l := utf8.RuneCountInString(*t)
 			valid = l >= min && l <= max
 		case *[]string:
 			l := len(*t)
