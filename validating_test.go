@@ -104,6 +104,15 @@ func TestAll(t *testing.T) {
 			},
 			nil,
 		},
+		{
+			func() v.Schema {
+				value := "hello,中国"
+				return v.Schema{
+					v.F("value", &value): v.All(v.Nonzero(), v.Len(1, 8)),
+				}
+			},
+			nil,
+		},
 	}
 	for _, c := range cases {
 		errs := v.Validate(c.schemaMaker())
