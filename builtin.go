@@ -1,6 +1,7 @@
 package validating
 
 import (
+	"regexp"
 	"time"
 )
 
@@ -610,6 +611,29 @@ func In(values ...interface{}) Validator {
 			}
 		default:
 			return NewErrors(field.Name, ErrUnrecognized, "of an unrecognized type")
+		}
+
+		if !valid {
+			return NewErrors(field.Name, ErrInvalid, msg)
+		}
+		return nil
+	})
+}
+
+// RegexpMatch is a leaf validator factory to create a validator, which will
+// succeed when the field's value matches the given regular expression.
+func RegexpMatch(re *regexp.Regexp, msgs ...string) Validator {
+	msg := getMsg("RegexpMatch", "does not match the given regular expression", msgs...)
+	return FromFunc(func(field Field) Errors {
+		valid := false
+
+		switch t := field.ValuePtr.(type) {
+		case *string:
+			valid = re.MatchString(*t)
+		case *[]byte:
+			valid = re.Match(*t)
+		default:
+			return NewErrors(field.Name, ErrUnsupported, "cannot use validator `RegexpMatch`")
 		}
 
 		if !valid {

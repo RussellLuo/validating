@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"reflect"
+	"regexp"
 	"testing"
 	"time"
 
@@ -3247,6 +3248,65 @@ func TestIn(t *testing.T) {
 		valuePtr, others := c.valuePtrMaker()
 		errs := v.Validate(v.Schema{
 			v.F("value", valuePtr): v.In(others...),
+		})
+		if !reflect.DeepEqual(makeErrsMap(errs), makeErrsMap(c.errs)) {
+			t.Errorf("Got (%+v) != Want (%+v)", errs, c.errs)
+		}
+	}
+}
+
+func TestRegexpMatch(t *testing.T) {
+	cases := []struct {
+		valuePtrMaker func() interface{}
+		re            *regexp.Regexp
+		msgs          []string
+		errs          v.Errors
+	}{
+		{
+			valuePtrMaker: func() interface{} {
+				value := 0
+				return &value
+			},
+			re:   regexp.MustCompile(``),
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `RegexpMatch`"),
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := "x13012345678"
+				return &value
+			},
+			re:   regexp.MustCompile(`^(86)?1\d{10}$`), // cellphone
+			errs: v.NewErrors("value", v.ErrInvalid, "does not match the given regular expression"),
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := "x13012345678"
+				return &value
+			},
+			re:   regexp.MustCompile(`^(86)?1\d{10}$`), // cellphone
+			msgs: []string{"invalid cellphone"},
+			errs: v.NewErrors("value", v.ErrInvalid, "invalid cellphone"),
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := "13012345678"
+				return &value
+			},
+			re:   regexp.MustCompile(`^(86)?1\d{10}$`), // cellphone
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() interface{} {
+				value := []byte("13012345678")
+				return &value
+			},
+			re:   regexp.MustCompile(`^(86)?1\d{10}$`), // cellphone
+			errs: nil,
+		},
+	}
+	for _, c := range cases {
+		errs := v.Validate(v.Schema{
+			v.F("value", c.valuePtrMaker()): v.RegexpMatch(c.re, c.msgs...),
 		})
 		if !reflect.DeepEqual(makeErrsMap(errs), makeErrsMap(c.errs)) {
 			t.Errorf("Got (%+v) != Want (%+v)", errs, c.errs)
