@@ -368,7 +368,7 @@ func TestLazy(t *testing.T) {
 		},
 	}
 	for _, c := range cases {
-		v.Validate(c.schemaMaker(&c.gotFlag))
+		v.Validate(c.schemaMaker(&c.gotFlag)) // nolint:errcheck
 		if !reflect.DeepEqual(c.gotFlag, c.wantFlag) {
 			t.Errorf("Got (%+v) != Want (%+v)", c.gotFlag, c.wantFlag)
 		}

@@ -221,7 +221,7 @@ func Nonzero(msgs ...string) Validator {
 		case *[]int:
 			valid = len(*t) != 0
 		case *bool:
-			valid = *t != false
+			valid = *t
 		case **bool:
 			valid = *t != nil
 		case *[]bool:
