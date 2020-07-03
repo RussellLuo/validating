@@ -55,6 +55,7 @@ A validator factory is a function to create a validator, which will do the actua
 - [Lte](https://godoc.org/github.com/RussellLuo/validating#Lte)
 - [Range](https://godoc.org/github.com/RussellLuo/validating#Range)
 - [In](https://godoc.org/github.com/RussellLuo/validating#In)
+- [RegexpMatch](https://godoc.org/github.com/RussellLuo/validating#RegexpMatch)
 
 ### Validator customizations
 
