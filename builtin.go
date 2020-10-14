@@ -73,16 +73,32 @@ var Or = Any
 // not is a helper function to negate the given validator.
 func not(validatorName string, validator Validator, field Field, msg string) Errors {
 	errs := validator.Validate(field)
-	if errs == nil {
+	if len(errs) == 0 {
 		return NewErrors(field.Name, ErrInvalid, msg)
 	}
 	switch errs[0].Kind() {
-	case ErrUnrecognized:
-		return errs
 	case ErrUnsupported:
 		return NewErrors(field.Name, ErrUnsupported, "cannot use validator `"+validatorName+"`")
+	case ErrUnrecognized:
+		return NewErrors(field.Name, ErrUnrecognized, "of an unrecognized type")
 	default:
 		return nil
+	}
+}
+
+// merge merges multiple errors, which occur from the composite validator, into one error.
+func merge(validatorName string, validator Validator, field Field, msg string) Errors {
+	errs := validator.Validate(field)
+	if len(errs) == 0 {
+		return nil
+	}
+	switch errs[0].Kind() {
+	case ErrUnsupported:
+		return NewErrors(field.Name, ErrUnsupported, "cannot use validator `"+validatorName+"`")
+	case ErrUnrecognized:
+		return NewErrors(field.Name, ErrUnrecognized, "of an unrecognized type")
+	default:
+		return NewErrors(field.Name, ErrInvalid, msg)
 	}
 }
 
@@ -491,58 +507,7 @@ func Gte(value interface{}) (mv *MessageValidator) {
 	mv = &MessageValidator{
 		message: "is lower than given value",
 		validator: FromFunc(func(field Field) Errors {
-			valid := false
-
-			switch t := field.ValuePtr.(type) {
-			case **uint8, *[]uint8, **uint16, *[]uint16,
-				**uint32, *[]uint32, **uint64, *[]uint64,
-				**int8, *[]int8, **int16, *[]int16,
-				**int32, *[]int32, **int64, *[]int64,
-				**float32, *[]float32, **float64, *[]float64,
-				**uint, *[]uint, **int, *[]int,
-				*bool, **bool, *[]bool,
-				**string, *[]string,
-				**time.Time, *[]time.Time,
-				**time.Duration, *[]time.Duration:
-				return NewErrors(field.Name, ErrUnsupported, "cannot use validator `Gte`")
-			case *uint8:
-				valid = *t >= value.(uint8)
-			case *uint16:
-				valid = *t >= value.(uint16)
-			case *uint32:
-				valid = *t >= value.(uint32)
-			case *uint64:
-				valid = *t >= value.(uint64)
-			case *int8:
-				valid = *t >= value.(int8)
-			case *int16:
-				valid = *t >= value.(int16)
-			case *int32:
-				valid = *t >= value.(int32)
-			case *int64:
-				valid = *t >= value.(int64)
-			case *float32:
-				valid = *t >= value.(float32)
-			case *float64:
-				valid = *t >= value.(float64)
-			case *uint:
-				valid = *t >= value.(uint)
-			case *int:
-				valid = *t >= value.(int)
-			case *string:
-				valid = *t >= value.(string)
-			case *time.Time:
-				valid = !(*t).Before(value.(time.Time))
-			case *time.Duration:
-				valid = *t >= value.(time.Duration)
-			default:
-				return NewErrors(field.Name, ErrUnrecognized, "of an unrecognized type")
-			}
-
-			if !valid {
-				return NewErrors(field.Name, ErrInvalid, mv.message)
-			}
-			return nil
+			return merge("Gte", Any(Gt(value), Eq(value)), field, mv.message)
 		}),
 	}
 	return
@@ -577,8 +542,7 @@ func Range(min, max interface{}) (mv *MessageValidator) {
 	mv = &MessageValidator{
 		message: "is not between given range",
 		validator: FromFunc(func(field Field) Errors {
-			v := All(Gte(min).Msg(mv.message), Lte(max).Msg(mv.message))
-			return v.Validate(field)
+			return merge("Range", All(Gte(min), Lte(max)), field, mv.message)
 		}),
 	}
 	return
