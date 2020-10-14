@@ -438,6 +438,18 @@ func Eq(value interface{}) (mv *MessageValidator) {
 	return
 }
 
+// Ne is a leaf validator factory to create a validator, which will
+// succeed when the field's value does not equal the given value.
+func Ne(value interface{}) (mv *MessageValidator) {
+	mv = &MessageValidator{
+		message: "equals the given value",
+		validator: FromFunc(func(field Field) Errors {
+			return not("Ne", Eq(value), field, mv.message)
+		}),
+	}
+	return
+}
+
 // Gt is a leaf validator factory to create a validator, which will
 // succeed when the field's value is greater than the given value.
 func Gt(value interface{}) (mv *MessageValidator) {

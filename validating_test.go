@@ -1630,7 +1630,7 @@ func TestLen(t *testing.T) {
 	}
 }
 
-func TestEq(t *testing.T) {
+func TestEq_Ne(t *testing.T) {
 	cases := []struct {
 		valuePtrMaker func() (interface{}, interface{})
 		msg           string
@@ -2128,10 +2128,20 @@ func TestEq(t *testing.T) {
 		t.Run("", func(t *testing.T) {
 			valuePtr, other := c.valuePtrMaker()
 
+			// Test Eq
 			errs := v.Validate(v.Schema{
 				v.F("value", valuePtr): v.Eq(other).Msg(c.msg),
 			})
 			if !reflect.DeepEqual(makeErrsMap(errs), makeErrsMap(c.errs)) {
+				t.Errorf("Got (%+v) != Want (%+v)", errs, c.errs)
+			}
+
+			// Test Ne
+			negativeWantErrs := negateErrs(c.errs, "Ne", "value", "equals the given value")
+			errs = v.Validate(v.Schema{
+				v.F("value", valuePtr): v.Ne(other).Msg(c.msg),
+			})
+			if !reflect.DeepEqual(makeErrsMap(errs), makeErrsMap(negativeWantErrs)) {
 				t.Errorf("Got (%+v) != Want (%+v)", errs, c.errs)
 			}
 		})
