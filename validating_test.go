@@ -1630,6 +1630,514 @@ func TestLen(t *testing.T) {
 	}
 }
 
+func TestEq(t *testing.T) {
+	cases := []struct {
+		valuePtrMaker func() (interface{}, interface{})
+		msg           string
+		errs          v.Errors
+	}{
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := uint8(0)
+				other := uint8(1)
+				return &value, other
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "does not equal the given value"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := uint8(2)
+				other := uint8(2)
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := (*uint8)(nil)
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Eq`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				var value []uint8
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Eq`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := uint16(0)
+				other := uint16(1)
+				return &value, other
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "does not equal the given value"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := uint16(2)
+				other := uint16(2)
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := (*uint16)(nil)
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Eq`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				var value []uint16
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Eq`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := uint32(0)
+				other := uint32(1)
+				return &value, other
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "does not equal the given value"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := uint32(2)
+				other := uint32(2)
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := (*uint32)(nil)
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Eq`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				var value []uint32
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Eq`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := uint64(0)
+				other := uint64(1)
+				return &value, other
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "does not equal the given value"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := uint64(2)
+				other := uint64(2)
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := (*uint64)(nil)
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Eq`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				var value []uint64
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Eq`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := int8(0)
+				other := int8(1)
+				return &value, other
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "does not equal the given value"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := int8(2)
+				other := int8(2)
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := (*int8)(nil)
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Eq`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				var value []int8
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Eq`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := int16(0)
+				other := int16(1)
+				return &value, other
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "does not equal the given value"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := int16(2)
+				other := int16(2)
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := (*int16)(nil)
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Eq`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				var value []int16
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Eq`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := int32(0)
+				other := int32(1)
+				return &value, other
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "does not equal the given value"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := int32(2)
+				other := int32(2)
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := (*int32)(nil)
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Eq`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				var value []int32
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Eq`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := int64(0)
+				other := int64(1)
+				return &value, other
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "does not equal the given value"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := int64(2)
+				other := int64(2)
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := (*int64)(nil)
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Eq`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := []int64{}
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Eq`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := float32(0)
+				other := float32(1)
+				return &value, other
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "does not equal the given value"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := float32(2)
+				other := float32(2)
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := (*float32)(nil)
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Eq`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				var value []float32
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Eq`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := float64(0)
+				other := float64(1)
+				return &value, other
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "does not equal the given value"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := float64(2)
+				other := float64(2)
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := (*float64)(nil)
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Eq`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				var value []float64
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Eq`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := uint(0)
+				other := uint(1)
+				return &value, other
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "does not equal the given value"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := uint(2)
+				other := uint(2)
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := (*uint)(nil)
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Eq`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				var value []uint
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Eq`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := int(0)
+				other := int(1)
+				return &value, other
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "does not equal the given value"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := int(2)
+				other := int(2)
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := (*int)(nil)
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Eq`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				var value []int
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Eq`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := false
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Eq`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := (*bool)(nil)
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Eq`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				var value []bool
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Eq`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := ""
+				other := "a"
+				return &value, other
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "does not equal the given value"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := "a"
+				other := "a"
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := (*string)(nil)
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Eq`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				var value []string
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Eq`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value, _ := time.Parse(time.RFC3339, "2020-10-14T00:00:00Z")
+				other, _ := time.Parse(time.RFC3339, "2020-10-13T00:00:00Z")
+				return &value, other
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "does not equal the given value"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value, _ := time.Parse(time.RFC3339, "2020-10-14T00:00:00Z")
+				other, _ := time.Parse(time.RFC3339, "2020-10-14T00:00:00Z")
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := (*time.Time)(nil)
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Eq`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				var value []time.Time
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Eq`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := time.Duration(0)
+				other := time.Duration(1)
+				return &value, other
+			},
+			errs: v.NewErrors("value", v.ErrInvalid, "does not equal the given value"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := time.Duration(2)
+				other := time.Duration(2)
+				return &value, other
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := (*time.Duration)(nil)
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Eq`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				var value []time.Duration
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Eq`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := func() {}
+				return &value, value
+			},
+			errs: v.NewErrors("value", v.ErrUnrecognized, "of an unrecognized type"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, interface{}) {
+				value := int(0)
+				other := int(1)
+				return &value, other
+			},
+			msg:  "is not ok",
+			errs: v.NewErrors("value", v.ErrInvalid, "is not ok"),
+		},
+	}
+	for _, c := range cases {
+		t.Run("", func(t *testing.T) {
+			valuePtr, other := c.valuePtrMaker()
+
+			errs := v.Validate(v.Schema{
+				v.F("value", valuePtr): v.Eq(other).Msg(c.msg),
+			})
+			if !reflect.DeepEqual(makeErrsMap(errs), makeErrsMap(c.errs)) {
+				t.Errorf("Got (%+v) != Want (%+v)", errs, c.errs)
+			}
+		})
+	}
+}
+
 func TestGt_Lte(t *testing.T) {
 	cases := []struct {
 		valuePtrMaker func() (interface{}, interface{})

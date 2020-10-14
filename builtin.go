@@ -359,6 +359,69 @@ func Len(min, max int) (mv *MessageValidator) {
 	return
 }
 
+// Eq is a leaf validator factory to create a validator, which will
+// succeed when the field's value equals the given value.
+func Eq(value interface{}) (mv *MessageValidator) {
+	mv = &MessageValidator{
+		message: "does not equal the given value",
+		validator: FromFunc(func(field Field) Errors {
+			valid := false
+
+			switch t := field.ValuePtr.(type) {
+			case **uint8, *[]uint8, **uint16, *[]uint16,
+				**uint32, *[]uint32, **uint64, *[]uint64,
+				**int8, *[]int8, **int16, *[]int16,
+				**int32, *[]int32, **int64, *[]int64,
+				**float32, *[]float32, **float64, *[]float64,
+				**uint, *[]uint, **int, *[]int,
+				*bool, **bool, *[]bool,
+				**string, *[]string,
+				**time.Time, *[]time.Time,
+				**time.Duration, *[]time.Duration:
+				return NewErrors(field.Name, ErrUnsupported, "cannot use validator `Eq`")
+			case *uint8:
+				valid = *t == value.(uint8)
+			case *uint16:
+				valid = *t == value.(uint16)
+			case *uint32:
+				valid = *t == value.(uint32)
+			case *uint64:
+				valid = *t == value.(uint64)
+			case *int8:
+				valid = *t == value.(int8)
+			case *int16:
+				valid = *t == value.(int16)
+			case *int32:
+				valid = *t == value.(int32)
+			case *int64:
+				valid = *t == value.(int64)
+			case *float32:
+				valid = *t == value.(float32)
+			case *float64:
+				valid = *t == value.(float64)
+			case *uint:
+				valid = *t == value.(uint)
+			case *int:
+				valid = *t == value.(int)
+			case *string:
+				valid = *t == value.(string)
+			case *time.Time:
+				valid = (*t).Equal(value.(time.Time))
+			case *time.Duration:
+				valid = *t == value.(time.Duration)
+			default:
+				return NewErrors(field.Name, ErrUnrecognized, "of an unrecognized type")
+			}
+
+			if !valid {
+				return NewErrors(field.Name, ErrInvalid, mv.message)
+			}
+			return nil
+		}),
+	}
+	return
+}
+
 // Gt is a leaf validator factory to create a validator, which will
 // succeed when the field's value is greater than the given value.
 func Gt(value interface{}) (mv *MessageValidator) {
