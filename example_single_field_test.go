@@ -3,12 +3,12 @@ package validating_test
 import (
 	"fmt"
 
-	v "github.com/RussellLuo/validating"
+	v "github.com/RussellLuo/validating/v2"
 )
 
 func Example_singleField() {
 	// import "fmt"
-	// import v "github.com/RussellLuo/validating"
+	// import v "github.com/RussellLuo/validating/v2"
 
 	value := 0
 	err := v.Validate(v.Schema{

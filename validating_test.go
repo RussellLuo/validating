@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	v "github.com/RussellLuo/validating"
+	v "github.com/RussellLuo/validating/v2"
 )
 
 type Author struct {
@@ -203,7 +203,7 @@ func TestNot(t *testing.T) {
 			func() v.Schema {
 				value := "a"
 				return v.Schema{
-					v.F("value", &value): v.Not(v.Any(v.Nonzero(), v.Len(2, 5)), "is not ok"),
+					v.F("value", &value): v.Not(v.Any(v.Nonzero(), v.Len(2, 5))).Msg("is not ok"),
 				}
 			},
 			v.NewErrors("value", v.ErrInvalid, "is not ok"),
@@ -402,7 +402,7 @@ func TestAssert(t *testing.T) {
 			func() v.Schema {
 				post := Post{}
 				return v.Schema{
-					v.F("comments", &post.Comments): v.Assert(false, "is not ok"),
+					v.F("comments", &post.Comments): v.Assert(false).Msg("is not ok"),
 				}
 			},
 			v.NewErrors("comments", v.ErrInvalid, "is not ok"),
@@ -419,7 +419,7 @@ func TestAssert(t *testing.T) {
 func TestNonzero(t *testing.T) {
 	cases := []struct {
 		valuePtrMaker func() interface{}
-		msgs          []string
+		msg           string
 		errs          v.Errors
 	}{
 		{
@@ -496,7 +496,7 @@ func TestNonzero(t *testing.T) {
 		},
 		{
 			valuePtrMaker: func() interface{} {
-				value := []uint16{}
+				var value []uint16
 				return &value
 			},
 			errs: v.NewErrors("value", v.ErrInvalid, "is zero valued"),
@@ -1122,13 +1122,13 @@ func TestNonzero(t *testing.T) {
 				value := int(0)
 				return &value
 			},
-			msgs: []string{"is not ok"},
+			msg:  "is not ok",
 			errs: v.NewErrors("value", v.ErrInvalid, "is not ok"),
 		},
 	}
 	for _, c := range cases {
 		errs := v.Validate(v.Schema{
-			v.F("value", c.valuePtrMaker()): v.Nonzero(c.msgs...),
+			v.F("value", c.valuePtrMaker()): v.Nonzero().Msg(c.msg),
 		})
 		if !reflect.DeepEqual(makeErrsMap(errs), makeErrsMap(c.errs)) {
 			t.Errorf("Got (%+v) != Want (%+v)", errs, c.errs)
@@ -1139,7 +1139,7 @@ func TestNonzero(t *testing.T) {
 func TestLen(t *testing.T) {
 	cases := []struct {
 		valuePtrMaker func() interface{}
-		msgs          []string
+		msg           string
 		errs          v.Errors
 	}{
 		{
@@ -1616,13 +1616,13 @@ func TestLen(t *testing.T) {
 				value := []int{}
 				return &value
 			},
-			msgs: []string{"is not ok"},
+			msg:  "is not ok",
 			errs: v.NewErrors("value", v.ErrInvalid, "is not ok"),
 		},
 	}
 	for _, c := range cases {
 		errs := v.Validate(v.Schema{
-			v.F("value", c.valuePtrMaker()): v.Len(1, math.MaxInt64, c.msgs...),
+			v.F("value", c.valuePtrMaker()): v.Len(1, math.MaxInt64).Msg(c.msg),
 		})
 		if !reflect.DeepEqual(makeErrsMap(errs), makeErrsMap(c.errs)) {
 			t.Errorf("Got (%+v) != Want (%+v)", errs, c.errs)
@@ -1633,7 +1633,7 @@ func TestLen(t *testing.T) {
 func TestGt_Lte(t *testing.T) {
 	cases := []struct {
 		valuePtrMaker func() (interface{}, interface{})
-		msgs          []string
+		msg           string
 		errs          v.Errors
 	}{
 		{
@@ -2120,7 +2120,7 @@ func TestGt_Lte(t *testing.T) {
 				other := int(1)
 				return &value, other
 			},
-			msgs: []string{"is not ok"},
+			msg:  "is not ok",
 			errs: v.NewErrors("value", v.ErrInvalid, "is not ok"),
 		},
 	}
@@ -2129,7 +2129,7 @@ func TestGt_Lte(t *testing.T) {
 
 		// Test Gt
 		errs := v.Validate(v.Schema{
-			v.F("value", valuePtr): v.Gt(other, c.msgs...),
+			v.F("value", valuePtr): v.Gt(other).Msg(c.msg),
 		})
 		if !reflect.DeepEqual(makeErrsMap(errs), makeErrsMap(c.errs)) {
 			t.Errorf("Got (%+v) != Want (%+v)", errs, c.errs)
@@ -2138,7 +2138,7 @@ func TestGt_Lte(t *testing.T) {
 		// Test Lte
 		negativeWantErrs := negateErrs(c.errs, "Lte", "value", "is greater than given value")
 		errs = v.Validate(v.Schema{
-			v.F("value", valuePtr): v.Lte(other, c.msgs...),
+			v.F("value", valuePtr): v.Lte(other).Msg(c.msg),
 		})
 		if !reflect.DeepEqual(makeErrsMap(errs), makeErrsMap(negativeWantErrs)) {
 			t.Errorf("Got (%+v) != Want (%+v)", errs, c.errs)
@@ -2149,7 +2149,7 @@ func TestGt_Lte(t *testing.T) {
 func TestGte_Lt(t *testing.T) {
 	cases := []struct {
 		valuePtrMaker func() (interface{}, interface{})
-		msgs          []string
+		msg           string
 		errs          v.Errors
 	}{
 		{
@@ -2756,7 +2756,7 @@ func TestGte_Lt(t *testing.T) {
 				other := int(1)
 				return &value, other
 			},
-			msgs: []string{"is not ok"},
+			msg:  "is not ok",
 			errs: v.NewErrors("value", v.ErrInvalid, "is not ok"),
 		},
 	}
@@ -2765,7 +2765,7 @@ func TestGte_Lt(t *testing.T) {
 
 		// Test Gte
 		errs := v.Validate(v.Schema{
-			v.F("value", valuePtr): v.Gte(other, c.msgs...),
+			v.F("value", valuePtr): v.Gte(other).Msg(c.msg),
 		})
 		if !reflect.DeepEqual(makeErrsMap(errs), makeErrsMap(c.errs)) {
 			t.Errorf("Got (%+v) != Want (%+v)", errs, c.errs)
@@ -2774,7 +2774,7 @@ func TestGte_Lt(t *testing.T) {
 		// Test Lt
 		negativeWantErrs := negateErrs(c.errs, "Lt", "value", "is greater than or equal to given value")
 		errs = v.Validate(v.Schema{
-			v.F("value", valuePtr): v.Lt(other, c.msgs...),
+			v.F("value", valuePtr): v.Lt(other).Msg(c.msg),
 		})
 		if !reflect.DeepEqual(makeErrsMap(errs), makeErrsMap(negativeWantErrs)) {
 			t.Errorf("Got (%+v) != Want (%+v)", errs, c.errs)
@@ -2785,7 +2785,7 @@ func TestGte_Lt(t *testing.T) {
 func TestIn(t *testing.T) {
 	cases := []struct {
 		valuePtrMaker func() (interface{}, []interface{})
-		msgs          []string
+		msg           string
 		errs          v.Errors
 	}{
 		{
@@ -3259,7 +3259,7 @@ func TestRegexpMatch(t *testing.T) {
 	cases := []struct {
 		valuePtrMaker func() interface{}
 		re            *regexp.Regexp
-		msgs          []string
+		msg           string
 		errs          v.Errors
 	}{
 		{
@@ -3284,7 +3284,7 @@ func TestRegexpMatch(t *testing.T) {
 				return &value
 			},
 			re:   regexp.MustCompile(`^(86)?1\d{10}$`), // cellphone
-			msgs: []string{"invalid cellphone"},
+			msg:  "invalid cellphone",
 			errs: v.NewErrors("value", v.ErrInvalid, "invalid cellphone"),
 		},
 		{
@@ -3306,7 +3306,7 @@ func TestRegexpMatch(t *testing.T) {
 	}
 	for _, c := range cases {
 		errs := v.Validate(v.Schema{
-			v.F("value", c.valuePtrMaker()): v.RegexpMatch(c.re, c.msgs...),
+			v.F("value", c.valuePtrMaker()): v.RegexpMatch(c.re).Msg(c.msg),
 		})
 		if !reflect.DeepEqual(makeErrsMap(errs), makeErrsMap(c.errs)) {
 			t.Errorf("Got (%+v) != Want (%+v)", errs, c.errs)

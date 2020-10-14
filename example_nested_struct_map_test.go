@@ -3,7 +3,7 @@ package validating_test
 import (
 	"fmt"
 
-	v "github.com/RussellLuo/validating"
+	v "github.com/RussellLuo/validating/v2"
 )
 
 type Member struct {
@@ -21,11 +21,11 @@ func makeSchema1(p *Person1) v.Schema {
 		v.F("name", &p.Name): v.Len(1, 5),
 		v.F("age", &p.Age):   v.Nonzero(),
 		v.F("family", &p.Family): v.All(
-			v.Assert(p.Family != nil, "is empty"),
+			v.Assert(p.Family != nil).Msg("is empty"),
 			v.NestedMulti(func() (schemas []v.Schema) {
 				for relation, member := range p.Family {
 					schemas = append(schemas, v.Schema{
-						v.F(fmt.Sprintf("[%s].name", relation), &member.Name): v.Len(10, 15, "is too long"),
+						v.F(fmt.Sprintf("[%s].name", relation), &member.Name): v.Len(10, 15).Msg("is too long"),
 					})
 				}
 				return
