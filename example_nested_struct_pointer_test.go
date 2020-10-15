@@ -3,7 +3,7 @@ package validating_test
 import (
 	"fmt"
 
-	v "github.com/RussellLuo/validating"
+	v "github.com/RussellLuo/validating/v2"
 )
 
 type Address2 struct {
@@ -21,7 +21,7 @@ func makeSchema2(p *Person2) v.Schema {
 		v.F("name", &p.Name): v.Len(1, 5),
 		v.F("age", &p.Age):   v.Lte(50),
 		v.F("address", &p.Address): v.All(
-			v.Assert(p.Address != nil, "is nil"),
+			v.Assert(p.Address != nil).Msg("is nil"),
 			v.Lazy(func() v.Validator {
 				return v.Nested(v.Schema{
 					v.F("country", &p.Address.Country):  v.Nonzero(),

@@ -3,7 +3,7 @@ package validating_test
 import (
 	"fmt"
 
-	v "github.com/RussellLuo/validating"
+	v "github.com/RussellLuo/validating/v2"
 )
 
 type Phone struct {
@@ -21,7 +21,7 @@ func makeSchema4(p *Person4) v.Schema {
 		v.F("name", &p.Name): v.Len(1, 5),
 		v.F("age", &p.Age):   v.Nonzero(),
 		v.F("phones", &p.Phones): v.All(
-			v.Assert(p.Phones != nil, "is empty"),
+			v.Assert(p.Phones != nil).Msg("is empty"),
 			v.NestedMulti(func() (schemas []v.Schema) {
 				for i, phone := range p.Phones {
 					schemas = append(schemas, v.Schema{

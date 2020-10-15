@@ -4,13 +4,13 @@ import (
 	"flag"
 	"fmt"
 
-	v "github.com/RussellLuo/validating"
+	v "github.com/RussellLuo/validating/v2"
 )
 
 func Example_flagField() {
 	// import "flag"
 	// import "fmt"
-	// import v "github.com/RussellLuo/validating"
+	// import v "github.com/RussellLuo/validating/v2"
 
 	value := flag.String("value", "", "Value argument")
 	flag.Parse()
