@@ -3,6 +3,7 @@ package validating
 import (
 	"regexp"
 	"time"
+	"unicode/utf8"
 )
 
 // MessageValidator is a validator that allows users to customize the INVALID
@@ -364,6 +365,34 @@ func Len(min, max int) (mv *MessageValidator) {
 				valid = l >= min && l <= max
 			default:
 				return NewErrors(field.Name, ErrUnrecognized, "of an unrecognized type")
+			}
+
+			if !valid {
+				return NewErrors(field.Name, ErrInvalid, mv.message)
+			}
+			return nil
+		}),
+	}
+	return
+}
+
+// RuneCount is a leaf validator factory to create a validator, which will
+// succeed when the number of runes in value is between min and max.
+func RuneCount(min, max int) (mv *MessageValidator) {
+	mv = &MessageValidator{
+		message: "the number of runes is not between the given range",
+		validator: FromFunc(func(field Field) Errors {
+			valid := false
+
+			switch t := field.ValuePtr.(type) {
+			case *string:
+				l := utf8.RuneCountInString(*t)
+				valid = l >= min && l <= max
+			case *[]byte:
+				l := utf8.RuneCount(*t)
+				valid = l >= min && l <= max
+			default:
+				return NewErrors(field.Name, ErrUnsupported, "cannot use validator `RuneCount`")
 			}
 
 			if !valid {

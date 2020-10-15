@@ -1628,6 +1628,67 @@ func TestLen(t *testing.T) {
 	}
 }
 
+func TestRuneCount(t *testing.T) {
+	cases := []struct {
+		valuePtrMaker func() (interface{}, int, int)
+		msg           string
+		errs          Errors
+	}{
+		{
+			valuePtrMaker: func() (interface{}, int, int) {
+				value := 0
+				return &value, 1, 2
+			},
+			errs: NewErrors("value", ErrUnsupported, "cannot use validator `RuneCount`"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, int, int) {
+				value := ""
+				return &value, 1, 2
+			},
+			errs: NewErrors("value", ErrInvalid, "the number of runes is not between the given range"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, int, int) {
+				value := "a"
+				return &value, 1, 2
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, int, int) {
+				value := "你好"
+				return &value, 1, 2
+			},
+			errs: nil,
+		},
+		{
+			valuePtrMaker: func() (interface{}, int, int) {
+				value := "你好吗"
+				return &value, 1, 2
+			},
+			errs: NewErrors("value", ErrInvalid, "the number of runes is not between the given range"),
+		},
+		{
+			valuePtrMaker: func() (interface{}, int, int) {
+				value := "你好吗"
+				return &value, 1, 2
+			},
+			msg:  "is not ok",
+			errs: NewErrors("value", ErrInvalid, "is not ok"),
+		},
+	}
+	for _, c := range cases {
+		valuePtr, min, max := c.valuePtrMaker()
+		errs := Validate(Schema{
+			F("value", valuePtr): RuneCount(min, max).Msg(c.msg),
+		})
+		if !reflect.DeepEqual(makeErrsMap(errs), makeErrsMap(c.errs)) {
+			t.Errorf("Got (%+v) != Want (%+v)", errs, c.errs)
+		}
+	}
+}
+
 func TestEq_Ne(t *testing.T) {
 	cases := []struct {
 		valuePtrMaker func() (interface{}, interface{})
