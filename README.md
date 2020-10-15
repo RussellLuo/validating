@@ -27,7 +27,7 @@ A Go library for validating structs and fields.
 
 
 ```bash
-$ go get github.com/RussellLuo/validating
+$ go get -u github.com/RussellLuo/validating/v2
 ```
 
 
@@ -39,23 +39,27 @@ A validator factory is a function to create a validator, which will do the actua
 
 ### Built-in validator factories
 
-- [FromFunc](https://godoc.org/github.com/RussellLuo/validating#FromFunc)
-- [All/And](https://godoc.org/github.com/RussellLuo/validating#All)
-- [Any/Or](https://godoc.org/github.com/RussellLuo/validating#All)
-- [Not](https://godoc.org/github.com/RussellLuo/validating#Not)
-- [Nested](https://godoc.org/github.com/RussellLuo/validating#Nested)
-- [NestedMulti](https://godoc.org/github.com/RussellLuo/validating#NestedMulti)
-- [Lazy](https://godoc.org/github.com/RussellLuo/validating#Lazy)
-- [Assert](https://godoc.org/github.com/RussellLuo/validating#Assert)
-- [Nonzero](https://godoc.org/github.com/RussellLuo/validating#Nonzero)
-- [Len](https://godoc.org/github.com/RussellLuo/validating#Len)
-- [Gt](https://godoc.org/github.com/RussellLuo/validating#Gt)
-- [Gte](https://godoc.org/github.com/RussellLuo/validating#Gte)
-- [Lt](https://godoc.org/github.com/RussellLuo/validating#Lt)
-- [Lte](https://godoc.org/github.com/RussellLuo/validating#Lte)
-- [Range](https://godoc.org/github.com/RussellLuo/validating#Range)
-- [In](https://godoc.org/github.com/RussellLuo/validating#In)
-- [RegexpMatch](https://godoc.org/github.com/RussellLuo/validating#RegexpMatch)
+- [FromFunc](https://pkg.go.dev/github.com/RussellLuo/validating/v2#FromFunc)
+- [All/And](https://pkg.go.dev/github.com/RussellLuo/validating/v2#All)
+- [Any/Or](https://pkg.go.dev/github.com/RussellLuo/validating/v2#All)
+- [Not](https://pkg.go.dev/github.com/RussellLuo/validating/v2#Not)
+- [Nested](https://pkg.go.dev/github.com/RussellLuo/validating/v2#Nested)
+- [NestedMulti](https://pkg.go.dev/github.com/RussellLuo/validating/v2#NestedMulti)
+- [Lazy](https://pkg.go.dev/github.com/RussellLuo/validating/v2#Lazy)
+- [Assert](https://pkg.go.dev/github.com/RussellLuo/validating/v2#Assert)
+- [Nonzero](https://pkg.go.dev/github.com/RussellLuo/validating/v2#Nonzero)
+- [Len](https://pkg.go.dev/github.com/RussellLuo/validating/v2#Len)
+- [RuneCount](https://pkg.go.dev/github.com/RussellLuo/validating/v2#RuneCount)
+- [Eq](https://pkg.go.dev/github.com/RussellLuo/validating/v2#Eq)
+- [Ne](https://pkg.go.dev/github.com/RussellLuo/validating/v2#Ne)
+- [Gt](https://pkg.go.dev/github.com/RussellLuo/validating/v2#Gt)
+- [Gte](https://pkg.go.dev/github.com/RussellLuo/validating/v2#Gte)
+- [Lt](https://pkg.go.dev/github.com/RussellLuo/validating/v2#Lt)
+- [Lte](https://pkg.go.dev/github.com/RussellLuo/validating/v2#Lte)
+- [Range](https://pkg.go.dev/github.com/RussellLuo/validating/v2#Range)
+- [In](https://pkg.go.dev/github.com/RussellLuo/validating/v2#In)
+- [Nin](https://pkg.go.dev/github.com/RussellLuo/validating/v2#Nin)
+- [RegexpMatch](https://pkg.go.dev/github.com/RussellLuo/validating/v2#RegexpMatch)
 
 ### Validator customizations
 
@@ -103,7 +107,7 @@ This library borrows some ideas from the following libraries:
 [MIT][5]
 
 
-[1]: https://godoc.org/github.com/RussellLuo/validating
+[1]: https://pkg.go.dev/github.com/RussellLuo/validating/v2
 [2]: https://github.com/mholt/binding
 [3]: https://github.com/alecthomas/voluptuous
 [4]: https://github.com/go-validator/validator
