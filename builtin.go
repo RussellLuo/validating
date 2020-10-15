@@ -705,6 +705,18 @@ func In(values ...interface{}) (mv *MessageValidator) {
 	return
 }
 
+// Nin is a leaf validator factory to create a validator, which will
+// succeed when the field's value is not equal to any of the given values.
+func Nin(values ...interface{}) (mv *MessageValidator) {
+	mv = &MessageValidator{
+		message: "is one of given values",
+		validator: FromFunc(func(field Field) Errors {
+			return not("Nin", In(values...), field, mv.message)
+		}),
+	}
+	return
+}
+
 // RegexpMatch is a leaf validator factory to create a validator, which will
 // succeed when the field's value matches the given regular expression.
 func RegexpMatch(re *regexp.Regexp) (mv *MessageValidator) {

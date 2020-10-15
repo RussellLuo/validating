@@ -2142,7 +2142,7 @@ func TestEq_Ne(t *testing.T) {
 				v.F("value", valuePtr): v.Ne(other).Msg(c.msg),
 			})
 			if !reflect.DeepEqual(makeErrsMap(errs), makeErrsMap(negativeWantErrs)) {
-				t.Errorf("Got (%+v) != Want (%+v)", errs, c.errs)
+				t.Errorf("Got (%+v) != Want (%+v)", errs, negativeWantErrs)
 			}
 		})
 	}
@@ -2659,7 +2659,7 @@ func TestGt_Lte(t *testing.T) {
 			v.F("value", valuePtr): v.Lte(other).Msg(c.msg),
 		})
 		if !reflect.DeepEqual(makeErrsMap(errs), makeErrsMap(negativeWantErrs)) {
-			t.Errorf("Got (%+v) != Want (%+v)", errs, c.errs)
+			t.Errorf("Got (%+v) != Want (%+v)", errs, negativeWantErrs)
 		}
 	}
 }
@@ -3295,12 +3295,12 @@ func TestGte_Lt(t *testing.T) {
 			v.F("value", valuePtr): v.Lt(other).Msg(c.msg),
 		})
 		if !reflect.DeepEqual(makeErrsMap(errs), makeErrsMap(negativeWantErrs)) {
-			t.Errorf("Got (%+v) != Want (%+v)", errs, c.errs)
+			t.Errorf("Got (%+v) != Want (%+v)", errs, negativeWantErrs)
 		}
 	}
 }
 
-func TestIn(t *testing.T) {
+func TestIn_Nin(t *testing.T) {
 	cases := []struct {
 		valuePtrMaker func() (interface{}, []interface{})
 		msg           string
@@ -3329,7 +3329,7 @@ func TestIn(t *testing.T) {
 		},
 		{
 			valuePtrMaker: func() (interface{}, []interface{}) {
-				value := []uint8{}
+				var value []uint8
 				return &value, nil
 			},
 			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `In`"),
@@ -3357,7 +3357,7 @@ func TestIn(t *testing.T) {
 		},
 		{
 			valuePtrMaker: func() (interface{}, []interface{}) {
-				value := []uint16{}
+				var value []uint16
 				return &value, nil
 			},
 			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `In`"),
@@ -3385,7 +3385,7 @@ func TestIn(t *testing.T) {
 		},
 		{
 			valuePtrMaker: func() (interface{}, []interface{}) {
-				value := []uint32{}
+				var value []uint32
 				return &value, nil
 			},
 			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `In`"),
@@ -3413,7 +3413,7 @@ func TestIn(t *testing.T) {
 		},
 		{
 			valuePtrMaker: func() (interface{}, []interface{}) {
-				value := []uint64{}
+				var value []uint64
 				return &value, nil
 			},
 			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `In`"),
@@ -3441,7 +3441,7 @@ func TestIn(t *testing.T) {
 		},
 		{
 			valuePtrMaker: func() (interface{}, []interface{}) {
-				value := []int8{}
+				var value []int8
 				return &value, nil
 			},
 			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `In`"),
@@ -3469,7 +3469,7 @@ func TestIn(t *testing.T) {
 		},
 		{
 			valuePtrMaker: func() (interface{}, []interface{}) {
-				value := []int16{}
+				var value []int16
 				return &value, nil
 			},
 			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `In`"),
@@ -3497,7 +3497,7 @@ func TestIn(t *testing.T) {
 		},
 		{
 			valuePtrMaker: func() (interface{}, []interface{}) {
-				value := []int32{}
+				var value []int32
 				return &value, nil
 			},
 			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `In`"),
@@ -3525,7 +3525,7 @@ func TestIn(t *testing.T) {
 		},
 		{
 			valuePtrMaker: func() (interface{}, []interface{}) {
-				value := []int64{}
+				var value []int64
 				return &value, nil
 			},
 			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `In`"),
@@ -3553,7 +3553,7 @@ func TestIn(t *testing.T) {
 		},
 		{
 			valuePtrMaker: func() (interface{}, []interface{}) {
-				value := []float32{}
+				var value []float32
 				return &value, nil
 			},
 			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `In`"),
@@ -3581,7 +3581,7 @@ func TestIn(t *testing.T) {
 		},
 		{
 			valuePtrMaker: func() (interface{}, []interface{}) {
-				value := []float64{}
+				var value []float64
 				return &value, nil
 			},
 			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `In`"),
@@ -3609,7 +3609,7 @@ func TestIn(t *testing.T) {
 		},
 		{
 			valuePtrMaker: func() (interface{}, []interface{}) {
-				value := []uint{}
+				var value []uint
 				return &value, nil
 			},
 			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `In`"),
@@ -3637,7 +3637,7 @@ func TestIn(t *testing.T) {
 		},
 		{
 			valuePtrMaker: func() (interface{}, []interface{}) {
-				value := []int{}
+				var value []int
 				return &value, nil
 			},
 			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `In`"),
@@ -3665,7 +3665,7 @@ func TestIn(t *testing.T) {
 		},
 		{
 			valuePtrMaker: func() (interface{}, []interface{}) {
-				value := []bool{}
+				var value []bool
 				return &value, nil
 			},
 			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `In`"),
@@ -3693,7 +3693,7 @@ func TestIn(t *testing.T) {
 		},
 		{
 			valuePtrMaker: func() (interface{}, []interface{}) {
-				value := []string{}
+				var value []string
 				return &value, nil
 			},
 			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `In`"),
@@ -3721,7 +3721,7 @@ func TestIn(t *testing.T) {
 		},
 		{
 			valuePtrMaker: func() (interface{}, []interface{}) {
-				value := []time.Time{}
+				var value []time.Time
 				return &value, nil
 			},
 			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `In`"),
@@ -3749,7 +3749,7 @@ func TestIn(t *testing.T) {
 		},
 		{
 			valuePtrMaker: func() (interface{}, []interface{}) {
-				value := []time.Duration{}
+				var value []time.Duration
 				return &value, nil
 			},
 			errs: v.NewErrors("value", v.ErrUnsupported, "cannot use validator `In`"),
@@ -3761,15 +3761,36 @@ func TestIn(t *testing.T) {
 			},
 			errs: v.NewErrors("value", v.ErrUnrecognized, "of an unrecognized type"),
 		},
+		{
+			valuePtrMaker: func() (interface{}, []interface{}) {
+				value := int(0)
+				return &value, []interface{}{int(1), int(2)}
+			},
+			msg:  "is not ok",
+			errs: v.NewErrors("value", v.ErrInvalid, "is not ok"),
+		},
 	}
 	for _, c := range cases {
-		valuePtr, others := c.valuePtrMaker()
-		errs := v.Validate(v.Schema{
-			v.F("value", valuePtr): v.In(others...),
+		t.Run("", func(t *testing.T) {
+			valuePtr, others := c.valuePtrMaker()
+
+			// Test In
+			errs := v.Validate(v.Schema{
+				v.F("value", valuePtr): v.In(others...).Msg(c.msg),
+			})
+			if !reflect.DeepEqual(makeErrsMap(errs), makeErrsMap(c.errs)) {
+				t.Errorf("Got (%+v) != Want (%+v)", errs, c.errs)
+			}
+
+			// Test Nin
+			negativeWantErrs := negateErrs(c.errs, "Nin", "value", "is one of given values")
+			errs = v.Validate(v.Schema{
+				v.F("value", valuePtr): v.Nin(others...).Msg(c.msg),
+			})
+			if !reflect.DeepEqual(makeErrsMap(errs), makeErrsMap(negativeWantErrs)) {
+				t.Errorf("Got (%+v) != Want (%+v)", errs, negativeWantErrs)
+			}
 		})
-		if !reflect.DeepEqual(makeErrsMap(errs), makeErrsMap(c.errs)) {
-			t.Errorf("Got (%+v) != Want (%+v)", errs, c.errs)
-		}
 	}
 }
 
