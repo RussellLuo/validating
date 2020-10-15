@@ -109,7 +109,17 @@ func Not(validator Validator) (mv *MessageValidator) {
 	mv = &MessageValidator{
 		message: "is invalid",
 		validator: FromFunc(func(field Field) Errors {
-			return not("Not", validator, field, mv.message)
+			errs := validator.Validate(field)
+			if len(errs) == 0 {
+				return NewErrors(field.Name, ErrInvalid, mv.message)
+			}
+			for _, err := range errs {
+				switch err.Kind() {
+				case ErrUnsupported, ErrUnrecognized:
+					return []Error{err}
+				}
+			}
+			return nil
 		}),
 	}
 	return
@@ -377,7 +387,7 @@ func Len(min, max int) (mv *MessageValidator) {
 }
 
 // RuneCount is a leaf validator factory to create a validator, which will
-// succeed when the number of runes in value is between min and max.
+// succeed when the number of runes in the field's value is between min and max.
 func RuneCount(min, max int) (mv *MessageValidator) {
 	mv = &MessageValidator{
 		message: "the number of runes is not between the given range",

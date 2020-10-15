@@ -172,6 +172,15 @@ func TestNot(t *testing.T) {
 	}{
 		{
 			func() Schema {
+				value := []string{"foo"}
+				return Schema{
+					F("value", &value): Not(Any(Len(2, 3), Eq("foo"))),
+				}
+			},
+			NewErrors("value", ErrUnsupported, "cannot use validator `Eq`"),
+		},
+		{
+			func() Schema {
 				value := ""
 				return Schema{
 					F("value", &value): Not(Nonzero()),
