@@ -64,7 +64,7 @@ A validator factory is a function to create a validator, which will do the actua
 ### Validator customizations
 
 - [From a boolean expression](example_nested_struct_pointer_test.go#L24)
-- [From a function](example_customizations_test.go#L32-L34)
+- [From a function](example_customizations_test.go#L32)
 - [From a struct](example_customizations_test.go#L22-L26)
 
 

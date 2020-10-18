@@ -131,7 +131,7 @@ func Nested(schema Schema) Validator {
 	return FromFunc(func(field Field) Errors {
 		nestedSchema := make(Schema, len(schema))
 		for f, v := range schema {
-			nestedSchema[F(field.Name+"."+f.Name, f.ValuePtr)] = v
+			nestedSchema[F(field.Name+f.Name, f.ValuePtr)] = v
 		}
 		return Validate(nestedSchema)
 	})
@@ -146,15 +146,13 @@ func NestedMulti(f func() []Schema) Validator {
 	for i, schema := range schemas {
 		validators[i] = Nested(schema)
 	}
-	return FromFunc(func(field Field) Errors {
-		var errs Errors
+	return FromFunc(func(field Field) (errs Errors) {
 		for _, v := range validators {
-			err := v.Validate(field)
-			if err != nil {
+			if err := v.Validate(field); err != nil {
 				errs.Extend(err)
 			}
 		}
-		return errs
+		return
 	})
 }
 

@@ -29,9 +29,7 @@ func Example_customizations() {
 	var value map[string]time.Time
 
 	// do validation by funcValidator
-	funcValidator := v.FromFunc(func(field v.Field) v.Errors {
-		return validate(field)
-	})
+	funcValidator := v.FromFunc(validate)
 	errs := v.Validate(v.Schema{
 		v.F("value", &value): funcValidator,
 	})
@@ -43,4 +41,8 @@ func Example_customizations() {
 		v.F("value", &value): structValidator,
 	})
 	fmt.Printf("errs from structValidator: %+v\n", errs)
+
+	// Output:
+	// errs from funcValidator: value: INVALID(is empty)
+	// errs from structValidator: value: INVALID(is empty)
 }

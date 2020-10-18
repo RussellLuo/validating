@@ -25,7 +25,7 @@ func makeSchema1(p *Person1) v.Schema {
 			v.NestedMulti(func() (schemas []v.Schema) {
 				for relation, member := range p.Family {
 					schemas = append(schemas, v.Schema{
-						v.F(fmt.Sprintf("[%s].name", relation), &member.Name): v.Len(10, 15).Msg("is too long"),
+						v.F(fmt.Sprintf("[%q].name", relation), &member.Name): v.Len(10, 15).Msg("is too long"),
 					})
 				}
 				return

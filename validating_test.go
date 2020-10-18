@@ -243,8 +243,8 @@ func TestNested(t *testing.T) {
 				post := Post{}
 				return Schema{
 					F("author", &post.Author): Nested(Schema{
-						F("name", &post.Author.Name): Nonzero(),
-						F("age", &post.Author.Age):   Nonzero(),
+						F(".name", &post.Author.Name): Nonzero(),
+						F(".age", &post.Author.Age):   Nonzero(),
 					}),
 				}
 			},
@@ -258,8 +258,8 @@ func TestNested(t *testing.T) {
 				post := Post{Author: Author{"russell", 10}}
 				return Schema{
 					F("author", &post.Author): Nested(Schema{
-						F("name", &post.Author.Name): Nonzero(),
-						F("age", &post.Author.Age):   Nonzero(),
+						F(".name", &post.Author.Name): Nonzero(),
+						F(".age", &post.Author.Age):   Nonzero(),
 					}),
 				}
 			},
@@ -308,8 +308,8 @@ func TestNestedMulti(t *testing.T) {
 				}
 			},
 			Errors{
-				NewError("comments.[0].content", ErrInvalid, "is zero valued"),
-				NewError("comments.[0].created_at", ErrInvalid, "is zero valued"),
+				NewError("comments[0].content", ErrInvalid, "is zero valued"),
+				NewError("comments[0].created_at", ErrInvalid, "is zero valued"),
 			},
 		},
 		{

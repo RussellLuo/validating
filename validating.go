@@ -21,12 +21,11 @@ type Validator interface {
 type Schema map[Field]Validator
 
 // Validate validates fields according to the pre-defined schema.
-func Validate(schema Schema) Errors {
-	var errs Errors
-	for field, v := range schema {
-		if err := v.Validate(field); err != nil {
+func Validate(schema Schema) (errs Errors) {
+	for f, v := range schema {
+		if err := v.Validate(f); err != nil {
 			errs.Extend(err)
 		}
 	}
-	return errs
+	return
 }
