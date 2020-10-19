@@ -22,11 +22,11 @@ func makeSchema4(p *Person4) v.Schema {
 		v.F("age", &p.Age):   v.Nonzero(),
 		v.F("phones", &p.Phones): v.All(
 			v.Assert(p.Phones != nil).Msg("is empty"),
-			v.NestedMulti(func() (schemas []v.Schema) {
-				for i, phone := range p.Phones {
+			v.Slice(func() (schemas []v.Schema) {
+				for _, phone := range p.Phones {
 					schemas = append(schemas, v.Schema{
-						v.F(fmt.Sprintf("[%d].number", i), &phone.Number): v.Nonzero(),
-						v.F(fmt.Sprintf("[%d].remark", i), &phone.Remark): v.Len(5, 7),
+						v.F("number", &phone.Number): v.Nonzero(),
+						v.F("remark", &phone.Remark): v.Len(5, 7),
 					})
 				}
 				return

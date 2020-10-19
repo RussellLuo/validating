@@ -19,12 +19,17 @@ type Comment struct {
 	CreatedAt time.Time
 }
 
+type Stat struct {
+	Count int
+}
+
 type Post struct {
 	Author    Author
 	Title     string
 	CreatedAt time.Time
 	Likes     int
 	Comments  []Comment
+	Stats     map[string]Stat
 }
 
 func makeErrsMap(errs Errors) map[string]Error {
@@ -260,6 +265,144 @@ func TestNested(t *testing.T) {
 					F("author", &post.Author): Nested(Schema{
 						F(".name", &post.Author.Name): Nonzero(),
 						F(".age", &post.Author.Age):   Nonzero(),
+					}),
+				}
+			},
+			nil,
+		},
+	}
+	for _, c := range cases {
+		errs := Validate(c.schemaMaker())
+		if !reflect.DeepEqual(makeErrsMap(errs), makeErrsMap(c.errs)) {
+			t.Errorf("Got (%+v) != Want (%+v)", errs, c.errs)
+		}
+	}
+}
+
+func TestMap(t *testing.T) {
+	cases := []struct {
+		schemaMaker func() Schema
+		errs        Errors
+	}{
+		{
+			func() Schema {
+				post := Post{}
+				return Schema{
+					F("stats", &post.Stats): Map(func() map[string]Schema {
+						return nil
+					}),
+				}
+			},
+			nil,
+		},
+		{
+			func() Schema {
+				post := Post{Stats: map[string]Stat{
+					"visitor": {Count: 0},
+					"visit":   {Count: 0},
+				}}
+				return Schema{
+					F("stats", &post.Stats): Map(func() map[string]Schema {
+						schemas := make(map[string]Schema)
+						for k, s := range post.Stats {
+							s := s
+							schemas[k] = Schema{
+								F("count", &s.Count): Nonzero(),
+							}
+						}
+						return schemas
+					}),
+				}
+			},
+			Errors{
+				NewError("stats[visitor].count", ErrInvalid, "is zero valued"),
+				NewError("stats[visit].count", ErrInvalid, "is zero valued"),
+			},
+		},
+		{
+			func() Schema {
+				post := Post{Stats: map[string]Stat{
+					"visitor": {Count: 1},
+					"visit":   {Count: 2},
+				}}
+				return Schema{
+					F("stats", &post.Stats): Map(func() map[string]Schema {
+						schemas := make(map[string]Schema)
+						for k, s := range post.Stats {
+							s := s
+							schemas[k] = Schema{
+								F("count", &s.Count): Nonzero(),
+							}
+						}
+						return schemas
+					}),
+				}
+			},
+			nil,
+		},
+	}
+	for _, c := range cases {
+		errs := Validate(c.schemaMaker())
+		if !reflect.DeepEqual(makeErrsMap(errs), makeErrsMap(c.errs)) {
+			t.Errorf("Got (%+v) != Want (%+v)", errs, c.errs)
+		}
+	}
+}
+
+func TestNestedSlice(t *testing.T) {
+	cases := []struct {
+		schemaMaker func() Schema
+		errs        Errors
+	}{
+		{
+			func() Schema {
+				post := Post{}
+				return Schema{
+					F("comments", &post.Comments): Slice(func() []Schema {
+						return nil
+					}),
+				}
+			},
+			nil,
+		},
+		{
+			func() Schema {
+				post := Post{Comments: []Comment{
+					{Content: "", CreatedAt: time.Time{}},
+				}}
+				return Schema{
+					F("comments", &post.Comments): Slice(func() (schemas []Schema) {
+						for _, c := range post.Comments {
+							c := c
+							schemas = append(schemas, Schema{
+								F("content", &c.Content):      Nonzero(),
+								F("created_at", &c.CreatedAt): Nonzero(),
+							})
+						}
+						return
+					}),
+				}
+			},
+			Errors{
+				NewError("comments[0].content", ErrInvalid, "is zero valued"),
+				NewError("comments[0].created_at", ErrInvalid, "is zero valued"),
+			},
+		},
+		{
+			func() Schema {
+				post := Post{Comments: []Comment{
+					{Content: "thanks", CreatedAt: time.Now()},
+				}}
+				return Schema{
+					F("comments", &post.Comments): Slice(func() (schemas []Schema) {
+						for _, c := range post.Comments {
+							c := c
+							schemas = append(schemas, Schema{
+								F("content", &c.Content):      Nonzero(),
+								F("created_at", &c.CreatedAt): Nonzero(),
+							})
+						}
+						return
 					}),
 				}
 			},

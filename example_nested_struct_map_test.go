@@ -22,13 +22,14 @@ func makeSchema1(p *Person1) v.Schema {
 		v.F("age", &p.Age):   v.Nonzero(),
 		v.F("family", &p.Family): v.All(
 			v.Assert(p.Family != nil).Msg("is empty"),
-			v.NestedMulti(func() (schemas []v.Schema) {
+			v.Map(func() map[string]v.Schema {
+				schemas := make(map[string]v.Schema)
 				for relation, member := range p.Family {
-					schemas = append(schemas, v.Schema{
-						v.F(fmt.Sprintf("[%q].name", relation), &member.Name): v.Len(10, 15).Msg("is too long"),
-					})
+					schemas[relation] = v.Schema{
+						v.F("name", &member.Name): v.Len(10, 15).Msg("is too long"),
+					}
 				}
-				return
+				return schemas
 			}),
 		),
 	}

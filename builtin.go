@@ -2,9 +2,86 @@ package validating
 
 import (
 	"regexp"
+	"strconv"
 	"time"
 	"unicode/utf8"
 )
+
+// FromFunc is an adapter to allow the use of ordinary functions as
+// validators. If f is a function with the appropriate signature,
+// FromFunc(f) is a Validator that calls f.
+type FromFunc func(field Field) Errors
+
+// Validate calls f(field).
+func (f FromFunc) Validate(field Field) Errors {
+	return f(field)
+}
+
+// validateSchema do the validation per the given schema, which is associated
+// with the given field.
+func validateSchema(schema Schema, field Field, parentNameFunc func(string) string) (errs Errors) {
+	for f, v := range schema {
+		if field.Name != "" {
+			name := parentNameFunc(field.Name)
+			if f.Name != "" {
+				name = name + "." + f.Name
+			}
+			f = F(name, f.ValuePtr)
+		}
+		if err := v.Validate(f); err != nil {
+			errs.Extend(err)
+		}
+	}
+	return
+}
+
+// Schema is a field mapping, which defines
+// the corresponding validator for each field.
+type Schema map[Field]Validator
+
+// Validate validates fields per the given according to the schema.
+func (s Schema) Validate(field Field) (errs Errors) {
+	return validateSchema(s, field, func(name string) string {
+		return name
+	})
+}
+
+// Map is a composite validator factory to create a validator, which will
+// do the validation per the schemas associated with a map.
+func Map(f func() map[string]Schema) Validator {
+	schemas := f()
+	return FromFunc(func(field Field) (errs Errors) {
+		for k, s := range schemas {
+			err := validateSchema(s, field, func(name string) string {
+				return name + "[" + k + "]"
+			})
+			if err != nil {
+				errs.Extend(err)
+			}
+		}
+		return
+	})
+}
+
+// Slice is a composite validator factory to create a validator, which will
+// do the validation per the schemas associated with a slice.
+func Slice(f func() []Schema) Validator {
+	schemas := f()
+	return FromFunc(func(field Field) (errs Errors) {
+		for i, s := range schemas {
+			err := validateSchema(s, field, func(name string) string {
+				return name + "[" + strconv.Itoa(i) + "]"
+			})
+			if err != nil {
+				errs.Extend(err)
+			}
+		}
+		return
+	})
+}
+
+// Array is an alias of Slice.
+var Array = Slice
 
 // MessageValidator is a validator that allows users to customize the INVALID
 // error message by calling Msg().
@@ -24,16 +101,6 @@ func (mv *MessageValidator) Msg(msg string) *MessageValidator {
 // Validate delegates the actual validation to its inner validator.
 func (mv *MessageValidator) Validate(field Field) Errors {
 	return mv.validator.Validate(field)
-}
-
-// FromFunc is an adapter to allow the use of ordinary functions as
-// validators. If f is a function with the appropriate signature,
-// FromFunc(f) is a Validator that calls f.
-type FromFunc func(field Field) Errors
-
-// Validate calls f(field).
-func (f FromFunc) Validate(field Field) Errors {
-	return f(field)
 }
 
 // All is a composite validator factory to create a validator, which will

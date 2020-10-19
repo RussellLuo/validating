@@ -16,16 +16,7 @@ type Validator interface {
 	Validate(field Field) Errors
 }
 
-// Schema is a field mapping, which defines
-// the corresponding validator for each field.
-type Schema map[Field]Validator
-
-// Validate validates fields according to the pre-defined schema.
-func Validate(schema Schema) (errs Errors) {
-	for f, v := range schema {
-		if err := v.Validate(f); err != nil {
-			errs.Extend(err)
-		}
-	}
-	return
+// Validate invokes v.Validate with an empty field.
+func Validate(v Validator) (errs Errors) {
+	return v.Validate(Field{})
 }
