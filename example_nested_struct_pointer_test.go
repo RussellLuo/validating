@@ -23,11 +23,11 @@ func makeSchema2(p *Person2) v.Schema {
 		v.F("address", &p.Address): v.All(
 			v.Assert(p.Address != nil).Msg("is nil"),
 			v.Lazy(func() v.Validator {
-				return v.Nested(v.Schema{
+				return v.Schema{
 					v.F("country", &p.Address.Country):  v.Nonzero(),
 					v.F("province", &p.Address.Country): v.Nonzero(),
 					v.F("city", &p.Address.City):        v.Nonzero(),
-				})
+				}
 			}),
 		),
 	}

@@ -194,6 +194,8 @@ func Not(validator Validator) (mv *MessageValidator) {
 
 // Nested is a composite validator factory to create a validator, which will
 // delegate the actual validation to its inner schema.
+//
+// This composite validator is DEPRECATED.
 func Nested(schema Schema) Validator {
 	return FromFunc(func(field Field) Errors {
 		nestedSchema := make(Schema, len(schema))
@@ -207,6 +209,8 @@ func Nested(schema Schema) Validator {
 // NestedMulti is a composite validator factory to create a validator, which will
 // delegate the actual validation to its inner multiple schemas, which are
 // returned by calling f.
+//
+// This composite validator is DEPRECATED.
 func NestedMulti(f func() []Schema) Validator {
 	schemas := f()
 	validators := make([]Validator, len(schemas))

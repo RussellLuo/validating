@@ -28,7 +28,7 @@ func (p *Person3) Schema() v.Schema {
 	return v.Schema{
 		v.F("name", &p.Name):       v.Len(1, 5),
 		v.F("age", &p.Age):         v.Gte(10),
-		v.F("address", &p.Address): v.Nested(p.Address.Schema()),
+		v.F("address", &p.Address): p.Address.Schema(),
 	}
 }
 
