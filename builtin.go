@@ -7,15 +7,18 @@ import (
 	"unicode/utf8"
 )
 
-// FromFunc is an adapter to allow the use of ordinary functions as
+// Func is an adapter to allow the use of ordinary functions as
 // validators. If f is a function with the appropriate signature,
-// FromFunc(f) is a Validator that calls f.
-type FromFunc func(field Field) Errors
+// Func(f) is a Validator that calls f.
+type Func func(field Field) Errors
 
 // Validate calls f(field).
-func (f FromFunc) Validate(field Field) Errors {
+func (f Func) Validate(field Field) Errors {
 	return f(field)
 }
+
+// FromFunc is DEPRECATED.
+type FromFunc = Func
 
 // validateSchema do the validation per the given schema, which is associated
 // with the given field.
@@ -59,7 +62,7 @@ func Value(valuePtr interface{}, validator Validator) Schema {
 // do the validation per the schemas associated with a map.
 func Map(f func() map[string]Schema) Validator {
 	schemas := f()
-	return FromFunc(func(field Field) (errs Errors) {
+	return Func(func(field Field) (errs Errors) {
 		for k, s := range schemas {
 			err := validateSchema(s, field, func(name string) string {
 				return name + "[" + k + "]"
@@ -76,7 +79,7 @@ func Map(f func() map[string]Schema) Validator {
 // do the validation per the schemas associated with a slice.
 func Slice(f func() []Schema) Validator {
 	schemas := f()
-	return FromFunc(func(field Field) (errs Errors) {
+	return Func(func(field Field) (errs Errors) {
 		for i, s := range schemas {
 			err := validateSchema(s, field, func(name string) string {
 				return name + "[" + strconv.Itoa(i) + "]"
@@ -115,7 +118,7 @@ func (mv *MessageValidator) Validate(field Field) Errors {
 // All is a composite validator factory to create a validator, which will
 // succeed only when all sub-validators succeed.
 func All(validators ...Validator) Validator {
-	return FromFunc(func(field Field) Errors {
+	return Func(func(field Field) Errors {
 		for _, v := range validators {
 			if errs := v.Validate(field); errs != nil {
 				return errs
@@ -131,7 +134,7 @@ var And = All
 // Any is a composite validator factory to create a validator, which will
 // succeed as long as any sub-validator succeeds.
 func Any(validators ...Validator) Validator {
-	return FromFunc(func(field Field) Errors {
+	return Func(func(field Field) Errors {
 		var errs Errors
 		for _, v := range validators {
 			err := v.Validate(field)
@@ -184,7 +187,7 @@ func merge(validatorName string, validator Validator, field Field, msg string) E
 func Not(validator Validator) (mv *MessageValidator) {
 	mv = &MessageValidator{
 		message: "is invalid",
-		validator: FromFunc(func(field Field) Errors {
+		validator: Func(func(field Field) Errors {
 			errs := validator.Validate(field)
 			if len(errs) == 0 {
 				return NewErrors(field.Name, ErrInvalid, mv.message)
@@ -206,7 +209,7 @@ func Not(validator Validator) (mv *MessageValidator) {
 //
 // This composite validator is DEPRECATED.
 func Nested(schema Schema) Validator {
-	return FromFunc(func(field Field) Errors {
+	return Func(func(field Field) Errors {
 		nestedSchema := make(Schema, len(schema))
 		for f, v := range schema {
 			nestedSchema[F(field.Name+f.Name, f.ValuePtr)] = v
@@ -226,7 +229,7 @@ func NestedMulti(f func() []Schema) Validator {
 	for i, schema := range schemas {
 		validators[i] = Nested(schema)
 	}
-	return FromFunc(func(field Field) (errs Errors) {
+	return Func(func(field Field) (errs Errors) {
 		for _, v := range validators {
 			if err := v.Validate(field); err != nil {
 				errs.Extend(err)
@@ -240,7 +243,7 @@ func NestedMulti(f func() []Schema) Validator {
 // call f only as needed, to delegate the actual validation to
 // the validator returned by f.
 func Lazy(f func() Validator) Validator {
-	return FromFunc(func(field Field) Errors {
+	return Func(func(field Field) Errors {
 		return f().Validate(field)
 	})
 }
@@ -250,7 +253,7 @@ func Lazy(f func() Validator) Validator {
 func Assert(b bool) (mv *MessageValidator) {
 	mv = &MessageValidator{
 		message: "is invalid",
-		validator: FromFunc(func(field Field) Errors {
+		validator: Func(func(field Field) Errors {
 			if !b {
 				return NewErrors(field.Name, ErrInvalid, mv.message)
 			}
@@ -265,7 +268,7 @@ func Assert(b bool) (mv *MessageValidator) {
 func Nonzero() (mv *MessageValidator) {
 	mv = &MessageValidator{
 		message: "is zero valued",
-		validator: FromFunc(func(field Field) Errors {
+		validator: Func(func(field Field) Errors {
 			valid := false
 
 			switch t := field.ValuePtr.(type) {
@@ -383,7 +386,7 @@ func Nonzero() (mv *MessageValidator) {
 func Len(min, max int) (mv *MessageValidator) {
 	mv = &MessageValidator{
 		message: "with an invalid length",
-		validator: FromFunc(func(field Field) Errors {
+		validator: Func(func(field Field) Errors {
 			valid := false
 
 			switch t := field.ValuePtr.(type) {
@@ -469,7 +472,7 @@ func Len(min, max int) (mv *MessageValidator) {
 func RuneCount(min, max int) (mv *MessageValidator) {
 	mv = &MessageValidator{
 		message: "the number of runes is not between the given range",
-		validator: FromFunc(func(field Field) Errors {
+		validator: Func(func(field Field) Errors {
 			valid := false
 
 			switch t := field.ValuePtr.(type) {
@@ -497,7 +500,7 @@ func RuneCount(min, max int) (mv *MessageValidator) {
 func Eq(value interface{}) (mv *MessageValidator) {
 	mv = &MessageValidator{
 		message: "does not equal the given value",
-		validator: FromFunc(func(field Field) Errors {
+		validator: Func(func(field Field) Errors {
 			valid := false
 
 			switch t := field.ValuePtr.(type) {
@@ -560,7 +563,7 @@ func Eq(value interface{}) (mv *MessageValidator) {
 func Ne(value interface{}) (mv *MessageValidator) {
 	mv = &MessageValidator{
 		message: "equals the given value",
-		validator: FromFunc(func(field Field) Errors {
+		validator: Func(func(field Field) Errors {
 			return not("Ne", Eq(value), field, mv.message)
 		}),
 	}
@@ -572,7 +575,7 @@ func Ne(value interface{}) (mv *MessageValidator) {
 func Gt(value interface{}) (mv *MessageValidator) {
 	mv = &MessageValidator{
 		message: "is lower than or equal to given value",
-		validator: FromFunc(func(field Field) Errors {
+		validator: Func(func(field Field) Errors {
 			valid := false
 
 			switch t := field.ValuePtr.(type) {
@@ -635,7 +638,7 @@ func Gt(value interface{}) (mv *MessageValidator) {
 func Gte(value interface{}) (mv *MessageValidator) {
 	mv = &MessageValidator{
 		message: "is lower than given value",
-		validator: FromFunc(func(field Field) Errors {
+		validator: Func(func(field Field) Errors {
 			return merge("Gte", Any(Gt(value), Eq(value)), field, mv.message)
 		}),
 	}
@@ -647,7 +650,7 @@ func Gte(value interface{}) (mv *MessageValidator) {
 func Lt(value interface{}) (mv *MessageValidator) {
 	mv = &MessageValidator{
 		message: "is greater than or equal to given value",
-		validator: FromFunc(func(field Field) Errors {
+		validator: Func(func(field Field) Errors {
 			return not("Lt", Gte(value), field, mv.message)
 		}),
 	}
@@ -659,7 +662,7 @@ func Lt(value interface{}) (mv *MessageValidator) {
 func Lte(value interface{}) (mv *MessageValidator) {
 	mv = &MessageValidator{
 		message: "is greater than given value",
-		validator: FromFunc(func(field Field) Errors {
+		validator: Func(func(field Field) Errors {
 			return not("Lte", Gt(value), field, mv.message)
 		}),
 	}
@@ -670,7 +673,7 @@ func Lte(value interface{}) (mv *MessageValidator) {
 func Range(min, max interface{}) (mv *MessageValidator) {
 	mv = &MessageValidator{
 		message: "is not between given range",
-		validator: FromFunc(func(field Field) Errors {
+		validator: Func(func(field Field) Errors {
 			return merge("Range", All(Gte(min), Lte(max)), field, mv.message)
 		}),
 	}
@@ -682,7 +685,7 @@ func Range(min, max interface{}) (mv *MessageValidator) {
 func In(values ...interface{}) (mv *MessageValidator) {
 	mv = &MessageValidator{
 		message: "is not one of given values",
-		validator: FromFunc(func(field Field) Errors {
+		validator: Func(func(field Field) Errors {
 			valid := false
 
 			switch t := field.ValuePtr.(type) {
@@ -827,7 +830,7 @@ func In(values ...interface{}) (mv *MessageValidator) {
 func Nin(values ...interface{}) (mv *MessageValidator) {
 	mv = &MessageValidator{
 		message: "is one of given values",
-		validator: FromFunc(func(field Field) Errors {
+		validator: Func(func(field Field) Errors {
 			return not("Nin", In(values...), field, mv.message)
 		}),
 	}
@@ -839,7 +842,7 @@ func Nin(values ...interface{}) (mv *MessageValidator) {
 func RegexpMatch(re *regexp.Regexp) (mv *MessageValidator) {
 	mv = &MessageValidator{
 		message: "does not match the given regular expression",
-		validator: FromFunc(func(field Field) Errors {
+		validator: Func(func(field Field) Errors {
 			valid := false
 
 			switch t := field.ValuePtr.(type) {

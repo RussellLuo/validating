@@ -39,7 +39,7 @@ A validator factory is a function to create a validator, which will do the actua
 
 ### Built-in validator factories
 
-- [FromFunc](https://pkg.go.dev/github.com/RussellLuo/validating/v2#FromFunc)
+- [Func](https://pkg.go.dev/github.com/RussellLuo/validating/v2#Func)
 - [Schema](https://pkg.go.dev/github.com/RussellLuo/validating/v2#Schema)
 - [Value](https://pkg.go.dev/github.com/RussellLuo/validating/v2#Value)
 - [Map](https://pkg.go.dev/github.com/RussellLuo/validating/v2#Map)
@@ -47,8 +47,6 @@ A validator factory is a function to create a validator, which will do the actua
 - [All/And](https://pkg.go.dev/github.com/RussellLuo/validating/v2#All)
 - [Any/Or](https://pkg.go.dev/github.com/RussellLuo/validating/v2#All)
 - [Not](https://pkg.go.dev/github.com/RussellLuo/validating/v2#Not)
-- [Nested](https://pkg.go.dev/github.com/RussellLuo/validating/v2#Nested)
-- [NestedMulti](https://pkg.go.dev/github.com/RussellLuo/validating/v2#NestedMulti)
 - [Lazy](https://pkg.go.dev/github.com/RussellLuo/validating/v2#Lazy)
 - [Assert](https://pkg.go.dev/github.com/RussellLuo/validating/v2#Assert)
 - [Nonzero](https://pkg.go.dev/github.com/RussellLuo/validating/v2#Nonzero)
@@ -74,8 +72,7 @@ A validator factory is a function to create a validator, which will do the actua
 
 ## Examples
 
-- [Single field](example_single_field_test.go)
-- [Flag field](example_flag_field_test.go)
+- [Simple value](example_simple_value_test.go)
 - [Simple struct](example_simple_struct_test.go)
 - [Nested struct](example_nested_struct_test.go)
 - [Nested struct (schema inside)](example_nested_struct_schema_inside_test.go)

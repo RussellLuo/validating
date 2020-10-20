@@ -29,7 +29,7 @@ func Example_customizations() {
 	var value map[string]time.Time
 
 	// do validation by funcValidator
-	funcValidator := v.FromFunc(validate)
+	funcValidator := v.Func(validate)
 	errs := v.Validate(v.Schema{
 		v.F("value", &value): funcValidator,
 	})
