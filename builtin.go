@@ -51,14 +51,14 @@ func (s Schema) Validate(field Field) (errs Errors) {
 	})
 }
 
-// Value is a shortcut for creating a schema for a simple value.
+// Value is a shortcut function used to create a schema for a simple value.
 func Value(valuePtr interface{}, validator Validator) Schema {
 	return Schema{
 		F("", valuePtr): validator,
 	}
 }
 
-// Map is a composite validator factory to create a validator, which will
+// Map is a composite validator factory used to create a validator, which will
 // do the validation per the schemas associated with a map.
 func Map(f func() map[string]Schema) Validator {
 	schemas := f()
@@ -75,7 +75,7 @@ func Map(f func() map[string]Schema) Validator {
 	})
 }
 
-// Slice is a composite validator factory to create a validator, which will
+// Slice is a composite validator factory used to create a validator, which will
 // do the validation per the schemas associated with a slice.
 func Slice(f func() []Schema) Validator {
 	schemas := f()
@@ -115,7 +115,7 @@ func (mv *MessageValidator) Validate(field Field) Errors {
 	return mv.validator.Validate(field)
 }
 
-// All is a composite validator factory to create a validator, which will
+// All is a composite validator factory used to create a validator, which will
 // succeed only when all sub-validators succeed.
 func All(validators ...Validator) Validator {
 	return Func(func(field Field) Errors {
@@ -131,7 +131,7 @@ func All(validators ...Validator) Validator {
 // And is an alias of All.
 var And = All
 
-// Any is a composite validator factory to create a validator, which will
+// Any is a composite validator factory used to create a validator, which will
 // succeed as long as any sub-validator succeeds.
 func Any(validators ...Validator) Validator {
 	return Func(func(field Field) Errors {
@@ -182,7 +182,7 @@ func merge(validatorName string, validator Validator, field Field, msg string) E
 	}
 }
 
-// Not is a composite validator factory to create a validator, which will
+// Not is a composite validator factory used to create a validator, which will
 // succeed when the given validator fails.
 func Not(validator Validator) (mv *MessageValidator) {
 	mv = &MessageValidator{
@@ -204,7 +204,7 @@ func Not(validator Validator) (mv *MessageValidator) {
 	return
 }
 
-// Nested is a composite validator factory to create a validator, which will
+// Nested is a composite validator factory used to create a validator, which will
 // delegate the actual validation to its inner schema.
 //
 // This composite validator is DEPRECATED.
@@ -218,7 +218,7 @@ func Nested(schema Schema) Validator {
 	})
 }
 
-// NestedMulti is a composite validator factory to create a validator, which will
+// NestedMulti is a composite validator factory used to create a validator, which will
 // delegate the actual validation to its inner multiple schemas, which are
 // returned by calling f.
 //
@@ -239,7 +239,7 @@ func NestedMulti(f func() []Schema) Validator {
 	})
 }
 
-// Lazy is a composite validator factory to create a validator, which will
+// Lazy is a composite validator factory used to create a validator, which will
 // call f only as needed, to delegate the actual validation to
 // the validator returned by f.
 func Lazy(f func() Validator) Validator {
@@ -248,7 +248,7 @@ func Lazy(f func() Validator) Validator {
 	})
 }
 
-// Assert is a leaf validator factory to create a validator, which will
+// Assert is a leaf validator factory used to create a validator, which will
 // succeed only when the boolean expression evaluates to true.
 func Assert(b bool) (mv *MessageValidator) {
 	mv = &MessageValidator{
@@ -263,7 +263,7 @@ func Assert(b bool) (mv *MessageValidator) {
 	return
 }
 
-// Nonzero is a leaf validator factory to create a validator, which will
+// Nonzero is a leaf validator factory used to create a validator, which will
 // succeed when the field's value is nonzero.
 func Nonzero() (mv *MessageValidator) {
 	mv = &MessageValidator{
@@ -381,7 +381,7 @@ func Nonzero() (mv *MessageValidator) {
 	return
 }
 
-// Len is a leaf validator factory to create a validator, which will
+// Len is a leaf validator factory used to create a validator, which will
 // succeed when the field's length is between min and max.
 func Len(min, max int) (mv *MessageValidator) {
 	mv = &MessageValidator{
@@ -467,7 +467,7 @@ func Len(min, max int) (mv *MessageValidator) {
 	return
 }
 
-// RuneCount is a leaf validator factory to create a validator, which will
+// RuneCount is a leaf validator factory used to create a validator, which will
 // succeed when the number of runes in the field's value is between min and max.
 func RuneCount(min, max int) (mv *MessageValidator) {
 	mv = &MessageValidator{
@@ -495,7 +495,7 @@ func RuneCount(min, max int) (mv *MessageValidator) {
 	return
 }
 
-// Eq is a leaf validator factory to create a validator, which will
+// Eq is a leaf validator factory used to create a validator, which will
 // succeed when the field's value equals the given value.
 func Eq(value interface{}) (mv *MessageValidator) {
 	mv = &MessageValidator{
@@ -558,7 +558,7 @@ func Eq(value interface{}) (mv *MessageValidator) {
 	return
 }
 
-// Ne is a leaf validator factory to create a validator, which will
+// Ne is a leaf validator factory used to create a validator, which will
 // succeed when the field's value does not equal the given value.
 func Ne(value interface{}) (mv *MessageValidator) {
 	mv = &MessageValidator{
@@ -570,7 +570,7 @@ func Ne(value interface{}) (mv *MessageValidator) {
 	return
 }
 
-// Gt is a leaf validator factory to create a validator, which will
+// Gt is a leaf validator factory used to create a validator, which will
 // succeed when the field's value is greater than the given value.
 func Gt(value interface{}) (mv *MessageValidator) {
 	mv = &MessageValidator{
@@ -633,7 +633,7 @@ func Gt(value interface{}) (mv *MessageValidator) {
 	return
 }
 
-// Gte is a leaf validator factory to create a validator, which will
+// Gte is a leaf validator factory used to create a validator, which will
 // succeed when the field's value is greater than or equal to the given value.
 func Gte(value interface{}) (mv *MessageValidator) {
 	mv = &MessageValidator{
@@ -645,7 +645,7 @@ func Gte(value interface{}) (mv *MessageValidator) {
 	return
 }
 
-// Lt is a leaf validator factory to create a validator, which will
+// Lt is a leaf validator factory used to create a validator, which will
 // succeed when the field's value is lower than the given value.
 func Lt(value interface{}) (mv *MessageValidator) {
 	mv = &MessageValidator{
@@ -657,7 +657,7 @@ func Lt(value interface{}) (mv *MessageValidator) {
 	return
 }
 
-// Lte is a leaf validator factory to create a validator, which will
+// Lte is a leaf validator factory used to create a validator, which will
 // succeed when the field's value is lower than or equal to the given value.
 func Lte(value interface{}) (mv *MessageValidator) {
 	mv = &MessageValidator{
@@ -680,7 +680,7 @@ func Range(min, max interface{}) (mv *MessageValidator) {
 	return
 }
 
-// In is a leaf validator factory to create a validator, which will
+// In is a leaf validator factory used to create a validator, which will
 // succeed when the field's value is equal to one of the given values.
 func In(values ...interface{}) (mv *MessageValidator) {
 	mv = &MessageValidator{
@@ -825,7 +825,7 @@ func In(values ...interface{}) (mv *MessageValidator) {
 	return
 }
 
-// Nin is a leaf validator factory to create a validator, which will
+// Nin is a leaf validator factory used to create a validator, which will
 // succeed when the field's value is not equal to any of the given values.
 func Nin(values ...interface{}) (mv *MessageValidator) {
 	mv = &MessageValidator{
@@ -837,7 +837,7 @@ func Nin(values ...interface{}) (mv *MessageValidator) {
 	return
 }
 
-// Match is a leaf validator factory to create a validator, which will
+// Match is a leaf validator factory used to create a validator, which will
 // succeed when the field's value matches the given regular expression.
 func Match(re *regexp.Regexp) (mv *MessageValidator) {
 	mv = &MessageValidator{

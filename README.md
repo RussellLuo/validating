@@ -35,7 +35,7 @@ $ go get -u github.com/RussellLuo/validating/v2
 
 To be strict, this library has a conceptual distinction between `validator factory` and `validator`.
 
-A validator factory is a function to create a validator, which will do the actual validation.
+A validator factory is a function used to create a validator, which will do the actual validation.
 
 ### Built-in validator factories
 
