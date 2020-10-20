@@ -1,6 +1,6 @@
 # validating
 
-A Go library for validating structs and fields.
+A Go library for validating structs, maps and slices.
 
 
 ## Features
@@ -74,6 +74,8 @@ A validator factory is a function to create a validator, which will do the actua
 
 - [Simple value](example_simple_value_test.go)
 - [Simple struct](example_simple_struct_test.go)
+- [Simple map](example_simple_map_test.go)
+- [Simple slice](example_simple_slice_test.go)
 - [Nested struct](example_nested_struct_test.go)
 - [Nested struct (schema inside)](example_nested_struct_schema_inside_test.go)
 - [Nested struct pointer](example_nested_struct_pointer_test.go)
