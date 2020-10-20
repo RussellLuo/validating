@@ -837,9 +837,9 @@ func Nin(values ...interface{}) (mv *MessageValidator) {
 	return
 }
 
-// RegexpMatch is a leaf validator factory to create a validator, which will
+// Match is a leaf validator factory to create a validator, which will
 // succeed when the field's value matches the given regular expression.
-func RegexpMatch(re *regexp.Regexp) (mv *MessageValidator) {
+func Match(re *regexp.Regexp) (mv *MessageValidator) {
 	mv = &MessageValidator{
 		message: "does not match the given regular expression",
 		validator: Func(func(field Field) Errors {
@@ -851,7 +851,7 @@ func RegexpMatch(re *regexp.Regexp) (mv *MessageValidator) {
 			case *[]byte:
 				valid = re.Match(*t)
 			default:
-				return NewErrors(field.Name, ErrUnsupported, "cannot use validator `RegexpMatch`")
+				return NewErrors(field.Name, ErrUnsupported, "cannot use validator `Match`")
 			}
 
 			if !valid {
@@ -862,3 +862,6 @@ func RegexpMatch(re *regexp.Regexp) (mv *MessageValidator) {
 	}
 	return
 }
+
+// RegexpMatch is DEPRECATED.
+var RegexpMatch = Match

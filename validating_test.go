@@ -4005,7 +4005,7 @@ func TestIn_Nin(t *testing.T) {
 	}
 }
 
-func TestRegexpMatch(t *testing.T) {
+func TestMatch(t *testing.T) {
 	cases := []struct {
 		valuePtrMaker func() interface{}
 		re            *regexp.Regexp
@@ -4018,7 +4018,7 @@ func TestRegexpMatch(t *testing.T) {
 				return &value
 			},
 			re:   regexp.MustCompile(``),
-			errs: NewErrors("value", ErrUnsupported, "cannot use validator `RegexpMatch`"),
+			errs: NewErrors("value", ErrUnsupported, "cannot use validator `Match`"),
 		},
 		{
 			valuePtrMaker: func() interface{} {
@@ -4056,7 +4056,7 @@ func TestRegexpMatch(t *testing.T) {
 	}
 	for _, c := range cases {
 		errs := Validate(Schema{
-			F("value", c.valuePtrMaker()): RegexpMatch(c.re).Msg(c.msg),
+			F("value", c.valuePtrMaker()): Match(c.re).Msg(c.msg),
 		})
 		if !reflect.DeepEqual(makeErrsMap(errs), makeErrsMap(c.errs)) {
 			t.Errorf("Got (%+v) != Want (%+v)", errs, c.errs)

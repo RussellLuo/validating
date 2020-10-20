@@ -61,7 +61,7 @@ A validator factory is a function to create a validator, which will do the actua
 - [Range](https://pkg.go.dev/github.com/RussellLuo/validating/v2#Range)
 - [In](https://pkg.go.dev/github.com/RussellLuo/validating/v2#In)
 - [Nin](https://pkg.go.dev/github.com/RussellLuo/validating/v2#Nin)
-- [RegexpMatch](https://pkg.go.dev/github.com/RussellLuo/validating/v2#RegexpMatch)
+- [Match](https://pkg.go.dev/github.com/RussellLuo/validating/v2#Match)
 
 ### Validator customizations
 
