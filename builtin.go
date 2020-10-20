@@ -48,6 +48,13 @@ func (s Schema) Validate(field Field) (errs Errors) {
 	})
 }
 
+// Var is a shortcut for creating a schema for a variable.
+func Var(valuePtr interface{}, validator Validator) Schema {
+	return Schema{
+		F("", valuePtr): validator,
+	}
+}
+
 // Map is a composite validator factory to create a validator, which will
 // do the validation per the schemas associated with a map.
 func Map(f func() map[string]Schema) Validator {

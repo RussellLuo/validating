@@ -64,5 +64,9 @@ func (e *errorImpl) Message() string {
 }
 
 func (e *errorImpl) Error() string {
-	return fmt.Sprintf("%s: %s(%s)", e.field, e.kind, e.message)
+	s := fmt.Sprintf("%s(%s)", e.kind, e.message)
+	if e.field == "" {
+		return s
+	}
+	return fmt.Sprintf("%s: %s", e.field, s)
 }

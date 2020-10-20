@@ -15,9 +15,7 @@ func Example_simpleMap() {
 		schemas := make(map[string]v.Schema)
 		for name, age := range ages {
 			age := age
-			schemas[name] = v.Schema{
-				v.F("", &age): v.Nonzero(),
-			}
+			schemas[name] = v.Var(&age, v.Nonzero())
 		}
 		return schemas
 	}))
