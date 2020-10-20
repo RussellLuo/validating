@@ -48,8 +48,8 @@ func (s Schema) Validate(field Field) (errs Errors) {
 	})
 }
 
-// Var is a shortcut for creating a schema for a variable.
-func Var(valuePtr interface{}, validator Validator) Schema {
+// Value is a shortcut for creating a schema for a simple value.
+func Value(valuePtr interface{}, validator Validator) Schema {
 	return Schema{
 		F("", valuePtr): validator,
 	}

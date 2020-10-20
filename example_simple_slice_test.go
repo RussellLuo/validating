@@ -11,7 +11,7 @@ func Example_simpleSlice() {
 	err := v.Validate(v.Slice(func() (schemas []v.Schema) {
 		for _, name := range names {
 			name := name
-			schemas = append(schemas, v.Var(&name, v.Nonzero()))
+			schemas = append(schemas, v.Value(&name, v.Nonzero()))
 		}
 		return schemas
 	}))
