@@ -19,10 +19,12 @@ func (f FromFunc) Validate(field Field) Errors {
 
 // validateSchema do the validation per the given schema, which is associated
 // with the given field.
-func validateSchema(schema Schema, field Field, parentNameFunc func(string) string) (errs Errors) {
+func validateSchema(schema Schema, field Field, prefixFunc func(string) string) (errs Errors) {
+	prefix := prefixFunc(field.Name)
+
 	for f, v := range schema {
-		if field.Name != "" {
-			name := parentNameFunc(field.Name)
+		if prefix != "" {
+			name := prefix
 			if f.Name != "" {
 				name = name + "." + f.Name
 			}
