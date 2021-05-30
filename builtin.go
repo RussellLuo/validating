@@ -98,21 +98,21 @@ var Array = Slice
 // MessageValidator is a validator that allows users to customize the INVALID
 // error message by calling Msg().
 type MessageValidator struct {
-	message   string
-	validator Validator
+	Message   string
+	Validator Validator
 }
 
 // Msg sets the INVALID error message.
 func (mv *MessageValidator) Msg(msg string) *MessageValidator {
 	if msg != "" {
-		mv.message = msg
+		mv.Message = msg
 	}
 	return mv
 }
 
 // Validate delegates the actual validation to its inner validator.
 func (mv *MessageValidator) Validate(field Field) Errors {
-	return mv.validator.Validate(field)
+	return mv.Validator.Validate(field)
 }
 
 // All is a composite validator factory used to create a validator, which will
@@ -186,11 +186,11 @@ func merge(validatorName string, validator Validator, field Field, msg string) E
 // succeed when the given validator fails.
 func Not(validator Validator) (mv *MessageValidator) {
 	mv = &MessageValidator{
-		message: "is invalid",
-		validator: Func(func(field Field) Errors {
+		Message: "is invalid",
+		Validator: Func(func(field Field) Errors {
 			errs := validator.Validate(field)
 			if len(errs) == 0 {
-				return NewErrors(field.Name, ErrInvalid, mv.message)
+				return NewErrors(field.Name, ErrInvalid, mv.Message)
 			}
 			for _, err := range errs {
 				switch err.Kind() {
@@ -252,10 +252,10 @@ func Lazy(f func() Validator) Validator {
 // succeed only when the boolean expression evaluates to true.
 func Assert(b bool) (mv *MessageValidator) {
 	mv = &MessageValidator{
-		message: "is invalid",
-		validator: Func(func(field Field) Errors {
+		Message: "is invalid",
+		Validator: Func(func(field Field) Errors {
 			if !b {
-				return NewErrors(field.Name, ErrInvalid, mv.message)
+				return NewErrors(field.Name, ErrInvalid, mv.Message)
 			}
 			return nil
 		}),
@@ -267,8 +267,8 @@ func Assert(b bool) (mv *MessageValidator) {
 // succeed when the field's value is nonzero.
 func Nonzero() (mv *MessageValidator) {
 	mv = &MessageValidator{
-		message: "is zero valued",
-		validator: Func(func(field Field) Errors {
+		Message: "is zero valued",
+		Validator: Func(func(field Field) Errors {
 			valid := false
 
 			switch t := field.ValuePtr.(type) {
@@ -373,7 +373,7 @@ func Nonzero() (mv *MessageValidator) {
 			}
 
 			if !valid {
-				return NewErrors(field.Name, ErrInvalid, mv.message)
+				return NewErrors(field.Name, ErrInvalid, mv.Message)
 			}
 			return nil
 		}),
@@ -385,8 +385,8 @@ func Nonzero() (mv *MessageValidator) {
 // succeed when the field's length is between min and max.
 func Len(min, max int) (mv *MessageValidator) {
 	mv = &MessageValidator{
-		message: "with an invalid length",
-		validator: Func(func(field Field) Errors {
+		Message: "with an invalid length",
+		Validator: Func(func(field Field) Errors {
 			valid := false
 
 			switch t := field.ValuePtr.(type) {
@@ -459,7 +459,7 @@ func Len(min, max int) (mv *MessageValidator) {
 			}
 
 			if !valid {
-				return NewErrors(field.Name, ErrInvalid, mv.message)
+				return NewErrors(field.Name, ErrInvalid, mv.Message)
 			}
 			return nil
 		}),
@@ -471,8 +471,8 @@ func Len(min, max int) (mv *MessageValidator) {
 // succeed when the number of runes in the field's value is between min and max.
 func RuneCount(min, max int) (mv *MessageValidator) {
 	mv = &MessageValidator{
-		message: "the number of runes is not between the given range",
-		validator: Func(func(field Field) Errors {
+		Message: "the number of runes is not between the given range",
+		Validator: Func(func(field Field) Errors {
 			valid := false
 
 			switch t := field.ValuePtr.(type) {
@@ -487,7 +487,7 @@ func RuneCount(min, max int) (mv *MessageValidator) {
 			}
 
 			if !valid {
-				return NewErrors(field.Name, ErrInvalid, mv.message)
+				return NewErrors(field.Name, ErrInvalid, mv.Message)
 			}
 			return nil
 		}),
@@ -499,8 +499,8 @@ func RuneCount(min, max int) (mv *MessageValidator) {
 // succeed when the field's value equals the given value.
 func Eq(value interface{}) (mv *MessageValidator) {
 	mv = &MessageValidator{
-		message: "does not equal the given value",
-		validator: Func(func(field Field) Errors {
+		Message: "does not equal the given value",
+		Validator: Func(func(field Field) Errors {
 			valid := false
 
 			switch t := field.ValuePtr.(type) {
@@ -550,7 +550,7 @@ func Eq(value interface{}) (mv *MessageValidator) {
 			}
 
 			if !valid {
-				return NewErrors(field.Name, ErrInvalid, mv.message)
+				return NewErrors(field.Name, ErrInvalid, mv.Message)
 			}
 			return nil
 		}),
@@ -562,9 +562,9 @@ func Eq(value interface{}) (mv *MessageValidator) {
 // succeed when the field's value does not equal the given value.
 func Ne(value interface{}) (mv *MessageValidator) {
 	mv = &MessageValidator{
-		message: "equals the given value",
-		validator: Func(func(field Field) Errors {
-			return not("Ne", Eq(value), field, mv.message)
+		Message: "equals the given value",
+		Validator: Func(func(field Field) Errors {
+			return not("Ne", Eq(value), field, mv.Message)
 		}),
 	}
 	return
@@ -574,8 +574,8 @@ func Ne(value interface{}) (mv *MessageValidator) {
 // succeed when the field's value is greater than the given value.
 func Gt(value interface{}) (mv *MessageValidator) {
 	mv = &MessageValidator{
-		message: "is lower than or equal to given value",
-		validator: Func(func(field Field) Errors {
+		Message: "is lower than or equal to given value",
+		Validator: Func(func(field Field) Errors {
 			valid := false
 
 			switch t := field.ValuePtr.(type) {
@@ -625,7 +625,7 @@ func Gt(value interface{}) (mv *MessageValidator) {
 			}
 
 			if !valid {
-				return NewErrors(field.Name, ErrInvalid, mv.message)
+				return NewErrors(field.Name, ErrInvalid, mv.Message)
 			}
 			return nil
 		}),
@@ -637,9 +637,9 @@ func Gt(value interface{}) (mv *MessageValidator) {
 // succeed when the field's value is greater than or equal to the given value.
 func Gte(value interface{}) (mv *MessageValidator) {
 	mv = &MessageValidator{
-		message: "is lower than given value",
-		validator: Func(func(field Field) Errors {
-			return merge("Gte", Any(Gt(value), Eq(value)), field, mv.message)
+		Message: "is lower than given value",
+		Validator: Func(func(field Field) Errors {
+			return merge("Gte", Any(Gt(value), Eq(value)), field, mv.Message)
 		}),
 	}
 	return
@@ -649,9 +649,9 @@ func Gte(value interface{}) (mv *MessageValidator) {
 // succeed when the field's value is lower than the given value.
 func Lt(value interface{}) (mv *MessageValidator) {
 	mv = &MessageValidator{
-		message: "is greater than or equal to given value",
-		validator: Func(func(field Field) Errors {
-			return not("Lt", Gte(value), field, mv.message)
+		Message: "is greater than or equal to given value",
+		Validator: Func(func(field Field) Errors {
+			return not("Lt", Gte(value), field, mv.Message)
 		}),
 	}
 	return
@@ -661,9 +661,9 @@ func Lt(value interface{}) (mv *MessageValidator) {
 // succeed when the field's value is lower than or equal to the given value.
 func Lte(value interface{}) (mv *MessageValidator) {
 	mv = &MessageValidator{
-		message: "is greater than given value",
-		validator: Func(func(field Field) Errors {
-			return not("Lte", Gt(value), field, mv.message)
+		Message: "is greater than given value",
+		Validator: Func(func(field Field) Errors {
+			return not("Lte", Gt(value), field, mv.Message)
 		}),
 	}
 	return
@@ -672,9 +672,9 @@ func Lte(value interface{}) (mv *MessageValidator) {
 // Range is a shortcut of `All(Gte(min), Lte(max))`.
 func Range(min, max interface{}) (mv *MessageValidator) {
 	mv = &MessageValidator{
-		message: "is not between given range",
-		validator: Func(func(field Field) Errors {
-			return merge("Range", All(Gte(min), Lte(max)), field, mv.message)
+		Message: "is not between given range",
+		Validator: Func(func(field Field) Errors {
+			return merge("Range", All(Gte(min), Lte(max)), field, mv.Message)
 		}),
 	}
 	return
@@ -684,8 +684,8 @@ func Range(min, max interface{}) (mv *MessageValidator) {
 // succeed when the field's value is equal to one of the given values.
 func In(values ...interface{}) (mv *MessageValidator) {
 	mv = &MessageValidator{
-		message: "is not one of given values",
-		validator: Func(func(field Field) Errors {
+		Message: "is not one of given values",
+		Validator: Func(func(field Field) Errors {
 			valid := false
 
 			switch t := field.ValuePtr.(type) {
@@ -817,7 +817,7 @@ func In(values ...interface{}) (mv *MessageValidator) {
 			}
 
 			if !valid {
-				return NewErrors(field.Name, ErrInvalid, mv.message)
+				return NewErrors(field.Name, ErrInvalid, mv.Message)
 			}
 			return nil
 		}),
@@ -829,9 +829,9 @@ func In(values ...interface{}) (mv *MessageValidator) {
 // succeed when the field's value is not equal to any of the given values.
 func Nin(values ...interface{}) (mv *MessageValidator) {
 	mv = &MessageValidator{
-		message: "is one of given values",
-		validator: Func(func(field Field) Errors {
-			return not("Nin", In(values...), field, mv.message)
+		Message: "is one of given values",
+		Validator: Func(func(field Field) Errors {
+			return not("Nin", In(values...), field, mv.Message)
 		}),
 	}
 	return
@@ -841,8 +841,8 @@ func Nin(values ...interface{}) (mv *MessageValidator) {
 // succeed when the field's value matches the given regular expression.
 func Match(re *regexp.Regexp) (mv *MessageValidator) {
 	mv = &MessageValidator{
-		message: "does not match the given regular expression",
-		validator: Func(func(field Field) Errors {
+		Message: "does not match the given regular expression",
+		Validator: Func(func(field Field) Errors {
 			valid := false
 
 			switch t := field.ValuePtr.(type) {
@@ -855,7 +855,7 @@ func Match(re *regexp.Regexp) (mv *MessageValidator) {
 			}
 
 			if !valid {
-				return NewErrors(field.Name, ErrInvalid, mv.message)
+				return NewErrors(field.Name, ErrInvalid, mv.Message)
 			}
 			return nil
 		}),
