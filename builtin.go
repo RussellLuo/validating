@@ -17,9 +17,6 @@ func (f Func) Validate(field Field) Errors {
 	return f(field)
 }
 
-// FromFunc is DEPRECATED.
-type FromFunc = Func
-
 // validateSchema do the validation per the given schema, which is associated
 // with the given field.
 func validateSchema(schema Schema, field Field, prefixFunc func(string) string) (errs Errors) {
@@ -202,41 +199,6 @@ func Not(validator Validator) (mv *MessageValidator) {
 		}),
 	}
 	return
-}
-
-// Nested is a composite validator factory used to create a validator, which will
-// delegate the actual validation to its inner schema.
-//
-// This composite validator is DEPRECATED.
-func Nested(schema Schema) Validator {
-	return Func(func(field Field) Errors {
-		nestedSchema := make(Schema, len(schema))
-		for f, v := range schema {
-			nestedSchema[F(field.Name+f.Name, f.ValuePtr)] = v
-		}
-		return Validate(nestedSchema)
-	})
-}
-
-// NestedMulti is a composite validator factory used to create a validator, which will
-// delegate the actual validation to its inner multiple schemas, which are
-// returned by calling f.
-//
-// This composite validator is DEPRECATED.
-func NestedMulti(f func() []Schema) Validator {
-	schemas := f()
-	validators := make([]Validator, len(schemas))
-	for i, schema := range schemas {
-		validators[i] = Nested(schema)
-	}
-	return Func(func(field Field) (errs Errors) {
-		for _, v := range validators {
-			if err := v.Validate(field); err != nil {
-				errs.Extend(err)
-			}
-		}
-		return
-	})
 }
 
 // Lazy is a composite validator factory used to create a validator, which will
@@ -862,6 +824,3 @@ func Match(re *regexp.Regexp) (mv *MessageValidator) {
 	}
 	return
 }
-
-// RegexpMatch is DEPRECATED.
-var RegexpMatch = Match
