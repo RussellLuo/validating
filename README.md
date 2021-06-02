@@ -63,6 +63,10 @@ A validator factory is a function used to create a validator, which will do the 
 - [Nin](https://pkg.go.dev/github.com/RussellLuo/validating/v2#Nin)
 - [Match](https://pkg.go.dev/github.com/RussellLuo/validating/v2#Match)
 
+### Extension validator factories
+
+- [vext](https://github.com/RussellLuo/vext)
+
 ### Validator customizations
 
 - [From a boolean expression](example_nested_struct_pointer_test.go#L24)
