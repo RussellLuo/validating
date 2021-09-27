@@ -128,20 +128,43 @@ func All(validators ...Validator) Validator {
 // And is an alias of All.
 var And = All
 
+// AnyValidator is a validator that allows users to change the returned errors
+// by calling UseLastError().
+type AnyValidator struct {
+	useLastError bool // Whether to use the last error if all validators fail.
+	validators   []Validator
+}
+
 // Any is a composite validator factory used to create a validator, which will
 // succeed as long as any sub-validator succeeds.
-func Any(validators ...Validator) Validator {
-	return Func(func(field Field) Errors {
-		var errs Errors
-		for _, v := range validators {
-			err := v.Validate(field)
-			if err == nil {
-				return nil
-			}
-			errs.Extend(err)
+func Any(validators ...Validator) *AnyValidator {
+	return &AnyValidator{validators: validators}
+}
+
+// UseLastError makes AnyValidator return the error from the last validator
+// if all inner validators fail.
+func (av *AnyValidator) UseLastError() *AnyValidator {
+	av.useLastError = true
+	return av
+}
+
+// Validate delegates the actual validation to its inner validators.
+func (av *AnyValidator) Validate(field Field) Errors {
+	var errs Errors
+	var lastErr Errors
+
+	for _, v := range av.validators {
+		lastErr = v.Validate(field)
+		if lastErr == nil {
+			return nil
 		}
-		return errs
-	})
+		errs.Extend(lastErr)
+	}
+
+	if av.useLastError {
+		return lastErr
+	}
+	return errs
 }
 
 // Or is an alias of Any.

@@ -160,6 +160,17 @@ func TestAny(t *testing.T) {
 				NewError("value", ErrInvalid, "is not one of given values"),
 			},
 		},
+		{
+			func() Schema {
+				value := "abc"
+				return Schema{
+					F("value", &value): Any(Len(1, 2), In("a", "ab")).UseLastError(),
+				}
+			},
+			Errors{
+				NewError("value", ErrInvalid, "is not one of given values"),
+			},
+		},
 	}
 	for _, c := range cases {
 		errs := Validate(c.schemaMaker())
