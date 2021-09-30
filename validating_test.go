@@ -164,7 +164,7 @@ func TestAny(t *testing.T) {
 			func() Schema {
 				value := "abc"
 				return Schema{
-					F("value", &value): Any(Len(1, 2), In("a", "ab")).UseLastError(),
+					F("value", &value): Any(Len(1, 2), In("a", "ab")).LastError(),
 				}
 			},
 			Errors{

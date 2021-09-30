@@ -129,10 +129,10 @@ func All(validators ...Validator) Validator {
 var And = All
 
 // AnyValidator is a validator that allows users to change the returned errors
-// by calling UseLastError().
+// by calling LastError().
 type AnyValidator struct {
-	useLastError bool // Whether to use the last error if all validators fail.
-	validators   []Validator
+	returnLastError bool // Whether to return the last error if all validators fail.
+	validators      []Validator
 }
 
 // Any is a composite validator factory used to create a validator, which will
@@ -141,10 +141,10 @@ func Any(validators ...Validator) *AnyValidator {
 	return &AnyValidator{validators: validators}
 }
 
-// UseLastError makes AnyValidator return the error from the last validator
+// LastError makes AnyValidator return the error from the last validator
 // if all inner validators fail.
-func (av *AnyValidator) UseLastError() *AnyValidator {
-	av.useLastError = true
+func (av *AnyValidator) LastError() *AnyValidator {
+	av.returnLastError = true
 	return av
 }
 
@@ -161,7 +161,7 @@ func (av *AnyValidator) Validate(field Field) Errors {
 		errs.Extend(lastErr)
 	}
 
-	if av.useLastError {
+	if av.returnLastError {
 		return lastErr
 	}
 	return errs
