@@ -460,7 +460,7 @@ func TestAssert(t *testing.T) {
 	}
 }
 
-func TestNonzero(t *testing.T) {
+func TestNonzero_Zero(t *testing.T) {
 	cases := []struct {
 		valuePtrMaker func() interface{}
 		msg           string
@@ -1171,11 +1171,23 @@ func TestNonzero(t *testing.T) {
 		},
 	}
 	for _, c := range cases {
+		valuePtr := c.valuePtrMaker()
+
+		// Test Nonzero
 		errs := Validate(Schema{
-			F("value", c.valuePtrMaker()): Nonzero().Msg(c.msg),
+			F("value", valuePtr): Nonzero().Msg(c.msg),
 		})
 		if !reflect.DeepEqual(makeErrsMap(errs), makeErrsMap(c.errs)) {
 			t.Errorf("Got (%+v) != Want (%+v)", errs, c.errs)
+		}
+
+		// Test Zero
+		negativeWantErrs := negateErrs(c.errs, "Zero", "value", "is nonzero")
+		errs = Validate(Schema{
+			F("value", valuePtr): Zero().Msg(c.msg),
+		})
+		if !reflect.DeepEqual(makeErrsMap(errs), makeErrsMap(negativeWantErrs)) {
+			t.Errorf("Got (%+v) != Want (%+v)", errs, negativeWantErrs)
 		}
 	}
 }

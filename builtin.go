@@ -366,6 +366,18 @@ func Nonzero() (mv *MessageValidator) {
 	return
 }
 
+// Zero is a leaf validator factory used to create a validator, which will
+// succeed when the field's value is zero.
+func Zero() (mv *MessageValidator) {
+	mv = &MessageValidator{
+		Message: "is nonzero",
+		Validator: Func(func(field Field) Errors {
+			return not("Zero", Nonzero(), field, mv.Message)
+		}),
+	}
+	return
+}
+
 // Len is a leaf validator factory used to create a validator, which will
 // succeed when the field's length is between min and max.
 func Len(min, max int) (mv *MessageValidator) {
