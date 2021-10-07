@@ -8,7 +8,8 @@ import (
 
 func Example_simpleValue() {
 	value := 0
-	err := v.Validate(v.Value(&value, v.Range(1, 5)))
+	// See https://github.com/golang/go/issues/41176.
+	err := v.Validate(v.Validator[int](v.Value(value, v.Validator[int](v.Eq(2)))))
 	fmt.Printf("%+v\n", err)
 
 	// Output:

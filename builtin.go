@@ -1,25 +1,26 @@
 package validating
 
-import (
+/*import (
 	"regexp"
 	"strconv"
 	"time"
 	"unicode/utf8"
 )
+*/
 
 // Func is an adapter to allow the use of ordinary functions as
 // validators. If f is a function with the appropriate signature,
 // Func(f) is a Validator that calls f.
-type Func func(field Field) Errors
+type Func[T any] func(field *Field[T]) Errors
 
 // Validate calls f(field).
-func (f Func) Validate(field Field) Errors {
+func (f Func[T]) Validate(field *Field[T]) Errors {
 	return f(field)
 }
 
 // validateSchema do the validation per the given schema, which is associated
 // with the given field.
-func validateSchema(schema Schema, field Field, prefixFunc func(string) string) (errs Errors) {
+func validateSchema[T any](schema Schema[T], field *Field[T], prefixFunc func(string) string) (errs Errors) {
 	prefix := prefixFunc(field.Name)
 
 	for f, v := range schema {
@@ -28,7 +29,7 @@ func validateSchema(schema Schema, field Field, prefixFunc func(string) string) 
 			if f.Name != "" {
 				name = name + "." + f.Name
 			}
-			f = F(name, f.ValuePtr)
+			f = F[T](name, f.Value)
 		}
 		if err := v.Validate(f); err != nil {
 			errs.Extend(err)
@@ -39,22 +40,22 @@ func validateSchema(schema Schema, field Field, prefixFunc func(string) string) 
 
 // Schema is a field mapping, which defines
 // the corresponding validator for each field.
-type Schema map[Field]Validator
+type Schema[T any] map[*Field[T]]Validator[T]
 
 // Validate validates fields per the given according to the schema.
-func (s Schema) Validate(field Field) (errs Errors) {
-	return validateSchema(s, field, func(name string) string {
+func (s Schema[T]) Validate(field *Field[T]) (errs Errors) {
+	return validateSchema[T](s, field, func(name string) string {
 		return name
 	})
 }
 
 // Value is a shortcut function used to create a schema for a simple value.
-func Value(valuePtr interface{}, validator Validator) Schema {
-	return Schema{
-		F("", valuePtr): validator,
+func Value[T any](value T, validator Validator[T]) Schema[T] {
+	return Schema[T]{
+		F[T]("", value): validator,
 	}
 }
-
+/*
 // Map is a composite validator factory used to create a validator, which will
 // do the validation per the schemas associated with a map.
 func Map(f func() map[string]Schema) Validator {
@@ -91,16 +92,17 @@ func Slice(f func() []Schema) Validator {
 
 // Array is an alias of Slice.
 var Array = Slice
+*/
 
 // MessageValidator is a validator that allows users to customize the INVALID
 // error message by calling Msg().
-type MessageValidator struct {
+type MessageValidator[T any] struct {
 	Message   string
-	Validator Validator
+	Validator Validator[T]
 }
 
 // Msg sets the INVALID error message.
-func (mv *MessageValidator) Msg(msg string) *MessageValidator {
+func (mv *MessageValidator[T]) Msg(msg string) *MessageValidator[T] {
 	if msg != "" {
 		mv.Message = msg
 	}
@@ -108,10 +110,11 @@ func (mv *MessageValidator) Msg(msg string) *MessageValidator {
 }
 
 // Validate delegates the actual validation to its inner validator.
-func (mv *MessageValidator) Validate(field Field) Errors {
+func (mv *MessageValidator[T]) Validate(field *Field[T]) Errors {
 	return mv.Validator.Validate(field)
 }
 
+/*
 // All is a composite validator factory used to create a validator, which will
 // succeed only when all sub-validators succeed.
 func All(validators ...Validator) Validator {
@@ -491,62 +494,15 @@ func RuneCount(min, max int) (mv *MessageValidator) {
 	}
 	return
 }
+*/
 
 // Eq is a leaf validator factory used to create a validator, which will
 // succeed when the field's value equals the given value.
-func Eq(value interface{}) (mv *MessageValidator) {
-	mv = &MessageValidator{
+func Eq[T comparable](value T) (mv *MessageValidator[T]) {
+	mv = &MessageValidator[T]{
 		Message: "does not equal the given value",
-		Validator: Func(func(field Field) Errors {
-			valid := false
-
-			switch t := field.ValuePtr.(type) {
-			case **uint8, *[]uint8, **uint16, *[]uint16,
-				**uint32, *[]uint32, **uint64, *[]uint64,
-				**int8, *[]int8, **int16, *[]int16,
-				**int32, *[]int32, **int64, *[]int64,
-				**float32, *[]float32, **float64, *[]float64,
-				**uint, *[]uint, **int, *[]int,
-				*bool, **bool, *[]bool,
-				**string, *[]string,
-				**time.Time, *[]time.Time,
-				**time.Duration, *[]time.Duration:
-				return NewErrors(field.Name, ErrUnsupported, "cannot use validator `Eq`")
-			case *uint8:
-				valid = *t == value.(uint8)
-			case *uint16:
-				valid = *t == value.(uint16)
-			case *uint32:
-				valid = *t == value.(uint32)
-			case *uint64:
-				valid = *t == value.(uint64)
-			case *int8:
-				valid = *t == value.(int8)
-			case *int16:
-				valid = *t == value.(int16)
-			case *int32:
-				valid = *t == value.(int32)
-			case *int64:
-				valid = *t == value.(int64)
-			case *float32:
-				valid = *t == value.(float32)
-			case *float64:
-				valid = *t == value.(float64)
-			case *uint:
-				valid = *t == value.(uint)
-			case *int:
-				valid = *t == value.(int)
-			case *string:
-				valid = *t == value.(string)
-			case *time.Time:
-				valid = (*t).Equal(value.(time.Time))
-			case *time.Duration:
-				valid = *t == value.(time.Duration)
-			default:
-				return NewErrors(field.Name, ErrUnrecognized, "of an unrecognized type")
-			}
-
-			if !valid {
+		Validator: Func[T](func(field *Field[T]) Errors {
+			if field.Value != value {
 				return NewErrors(field.Name, ErrInvalid, mv.Message)
 			}
 			return nil
@@ -555,6 +511,7 @@ func Eq(value interface{}) (mv *MessageValidator) {
 	return
 }
 
+/*
 // Ne is a leaf validator factory used to create a validator, which will
 // succeed when the field's value does not equal the given value.
 func Ne(value interface{}) (mv *MessageValidator) {
@@ -859,3 +816,4 @@ func Match(re *regexp.Regexp) (mv *MessageValidator) {
 	}
 	return
 }
+*/
