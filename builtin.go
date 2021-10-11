@@ -55,6 +55,7 @@ func Value[T any](value T, validator Validator[T]) Schema[T] {
 		F[T]("", value): validator,
 	}
 }
+
 /*
 // Map is a composite validator factory used to create a validator, which will
 // do the validation per the schemas associated with a map.
@@ -250,7 +251,24 @@ func Assert(b bool) (mv *MessageValidator) {
 	}
 	return
 }
+*/
 
+// Is is a leaf validator factory used to create a validator, which will
+// succeed when the predicate function f returns true for the field's value.
+func Is[T any](f func(T) bool) (mv *MessageValidator[T]) {
+	mv = &MessageValidator[T]{
+		Message: "is invalid",
+		Validator: Func[T](func(field *Field[T]) Errors {
+			if !f(field.Value) {
+				return NewErrors(field.Name, ErrInvalid, mv.Message)
+			}
+			return nil
+		}),
+	}
+	return
+}
+
+/*
 // Nonzero is a leaf validator factory used to create a validator, which will
 // succeed when the field's value is nonzero.
 func Nonzero() (mv *MessageValidator) {
