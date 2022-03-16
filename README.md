@@ -51,6 +51,7 @@ A validator factory is a function used to create a validator, which will do the 
 - [Assert](https://pkg.go.dev/github.com/RussellLuo/validating/v2#Assert)
 - [Nonzero](https://pkg.go.dev/github.com/RussellLuo/validating/v2#Nonzero)
 - [Zero](https://pkg.go.dev/github.com/RussellLuo/validating/v2#Zero)
+- [ZeroOr](https://pkg.go.dev/github.com/RussellLuo/validating/v2#ZeroOr)
 - [Len](https://pkg.go.dev/github.com/RussellLuo/validating/v2#Len)
 - [RuneCount](https://pkg.go.dev/github.com/RussellLuo/validating/v2#RuneCount)
 - [Eq](https://pkg.go.dev/github.com/RussellLuo/validating/v2#Eq)

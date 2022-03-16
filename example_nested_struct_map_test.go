@@ -20,8 +20,7 @@ func makeSchema1(p *Person1) v.Schema {
 	return v.Schema{
 		v.F("name", &p.Name): v.Len(1, 5),
 		v.F("age", &p.Age):   v.Nonzero(),
-		v.F("family", &p.Family): v.All(
-			v.Assert(p.Family != nil).Msg("is empty"),
+		v.F("family", &p.Family): v.ZeroOr(
 			v.Map(func() map[string]v.Schema {
 				schemas := make(map[string]v.Schema)
 				for relation, member := range p.Family {

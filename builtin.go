@@ -378,6 +378,14 @@ func Zero() (mv *MessageValidator) {
 	return
 }
 
+// ZeroOr is a composite validator factory used to create a validator, which will
+// succeed if the field's value is zero, or if the given validator succeeds.
+//
+// ZeroOr will return the error from the given validator if it fails.
+func ZeroOr(validator Validator) Validator {
+	return Any(Zero(), validator).LastError()
+}
+
 // Len is a leaf validator factory used to create a validator, which will
 // succeed when the field's length is between min and max.
 func Len(min, max int) (mv *MessageValidator) {
