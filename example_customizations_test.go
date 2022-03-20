@@ -4,45 +4,40 @@ import (
 	"fmt"
 	"time"
 
-	v "github.com/RussellLuo/validating/v2"
+	v "github.com/RussellLuo/validating/v3"
 )
 
-func validate(field v.Field) v.Errors {
-	switch t := field.ValuePtr.(type) {
-	case *map[string]time.Time:
-		if *t == nil {
-			return v.NewErrors(field.Name, v.ErrInvalid, "is empty")
-		}
-		return nil
-	default:
-		return v.NewErrors(field.Name, v.ErrUnsupported, "is unsupported")
+func mapNonzero(field *v.Field) v.Errors {
+	value, ok := field.Value.(map[string]time.Time)
+	if !ok {
+		return v.NewUnsupportedErrors(field, "mapNonzero")
 	}
+	if len(value) == 0 {
+		return v.NewErrors(field.Name, v.ErrInvalid, "is zero valued")
+	}
+	return nil
 }
 
 type MyValidator struct{}
 
-func (mv *MyValidator) Validate(field v.Field) v.Errors {
-	return validate(field)
+func (mv MyValidator) Validate(field *v.Field) v.Errors {
+	return mapNonzero(field)
 }
 
 func Example_customizations() {
 	var value map[string]time.Time
 
-	// do validation by funcValidator
-	funcValidator := v.Func(validate)
 	errs := v.Validate(v.Schema{
-		v.F("value", &value): funcValidator,
+		v.F("value", value): v.Func(mapNonzero),
 	})
-	fmt.Printf("errs from funcValidator: %+v\n", errs)
+	fmt.Printf("errs from the func-validator: %+v\n", errs)
 
-	// do validation by structValidator
-	structValidator := &MyValidator{}
 	errs = v.Validate(v.Schema{
-		v.F("value", &value): structValidator,
+		v.F("value", value): MyValidator{},
 	})
-	fmt.Printf("errs from structValidator: %+v\n", errs)
+	fmt.Printf("errs from the struct-validator: %+v\n", errs)
 
 	// Output:
-	// errs from funcValidator: value: INVALID(is empty)
-	// errs from structValidator: value: INVALID(is empty)
+	// errs from the func-validator: value: INVALID(is zero valued)
+	// errs from the struct-validator: value: INVALID(is zero valued)
 }

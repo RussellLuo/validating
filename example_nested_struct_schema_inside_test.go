@@ -3,7 +3,7 @@ package validating_test
 import (
 	"fmt"
 
-	v "github.com/RussellLuo/validating/v2"
+	v "github.com/RussellLuo/validating/v3"
 )
 
 type Address3 struct {
@@ -12,9 +12,9 @@ type Address3 struct {
 
 func (a *Address3) Schema() v.Schema {
 	return v.Schema{
-		v.F("country", &a.Country):  v.Nonzero(),
-		v.F("province", &a.Country): v.Nonzero(),
-		v.F("city", &a.City):        v.Nonzero(),
+		v.F("country", a.Country):   v.Nonzero[string](),
+		v.F("province", a.Province): v.Nonzero[string](),
+		v.F("city", a.City):         v.Nonzero[string](),
 	}
 }
 
@@ -26,9 +26,9 @@ type Person3 struct {
 
 func (p *Person3) Schema() v.Schema {
 	return v.Schema{
-		v.F("name", &p.Name):       v.Len(1, 5),
-		v.F("age", &p.Age):         v.Gte(10),
-		v.F("address", &p.Address): p.Address.Schema(),
+		v.F("name", p.Name):       v.LenString(1, 5),
+		v.F("age", p.Age):         v.Gte(10),
+		v.F("address", p.Address): p.Address.Schema(),
 	}
 }
 
