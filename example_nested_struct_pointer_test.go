@@ -3,7 +3,7 @@ package validating_test
 import (
 	"fmt"
 
-	v "github.com/RussellLuo/validating/v2"
+	v "github.com/RussellLuo/validating/v3"
 )
 
 type Address2 struct {
@@ -18,15 +18,15 @@ type Person2 struct {
 
 func makeSchema2(p *Person2) v.Schema {
 	return v.Schema{
-		v.F("name", &p.Name): v.Len(1, 5),
-		v.F("age", &p.Age):   v.Lte(50),
-		v.F("address", &p.Address): v.All(
+		v.F("name", p.Name): v.LenString(1, 5),
+		v.F("age", p.Age):   v.Lte(50),
+		v.F("address", p.Address): v.All(
 			v.Assert(p.Address != nil).Msg("is nil"),
 			v.Lazy(func() v.Validator {
 				return v.Schema{
-					v.F("country", &p.Address.Country):  v.Nonzero(),
-					v.F("province", &p.Address.Country): v.Nonzero(),
-					v.F("city", &p.Address.City):        v.Nonzero(),
+					v.F("country", p.Address.Country):   v.Nonzero[string](),
+					v.F("province", p.Address.Province): v.Nonzero[string](),
+					v.F("city", p.Address.City):         v.Nonzero[string](),
 				}
 			}),
 		),

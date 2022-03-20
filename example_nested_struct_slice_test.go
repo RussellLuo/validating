@@ -3,7 +3,7 @@ package validating_test
 import (
 	"fmt"
 
-	v "github.com/RussellLuo/validating/v2"
+	v "github.com/RussellLuo/validating/v3"
 )
 
 type Phone struct {
@@ -18,19 +18,17 @@ type Person4 struct {
 
 func makeSchema4(p *Person4) v.Schema {
 	return v.Schema{
-		v.F("name", &p.Name): v.Len(1, 5),
-		v.F("age", &p.Age):   v.Nonzero(),
-		v.F("phones", &p.Phones): v.ZeroOr(
-			v.Slice(func() (schemas []v.Schema) {
-				for _, phone := range p.Phones {
-					schemas = append(schemas, v.Schema{
-						v.F("number", &phone.Number): v.Nonzero(),
-						v.F("remark", &phone.Remark): v.Len(5, 7),
-					})
-				}
-				return
-			}),
-		),
+		v.F("name", p.Name): v.LenString(1, 5),
+		v.F("age", p.Age):   v.Nonzero[int](),
+		v.F("phones", p.Phones): v.Slice(func() (schemas []v.Schema) {
+			for _, phone := range p.Phones {
+				schemas = append(schemas, v.Schema{
+					v.F("number", phone.Number): v.Nonzero[string](),
+					v.F("remark", phone.Remark): v.LenString(5, 7),
+				})
+			}
+			return
+		}),
 	}
 }
 
