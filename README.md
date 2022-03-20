@@ -27,7 +27,7 @@ A Go library for validating structs, maps and slices.
 
 
 ```bash
-$ go install github.com/RussellLuo/validating/v3@latest
+$ go get github.com/RussellLuo/validating/v3@latest
 ```
 
 
