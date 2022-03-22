@@ -42,15 +42,12 @@ A validator factory is a function used to create a validator, which will do the 
 - [Func](https://pkg.go.dev/github.com/RussellLuo/validating/v3#Func)
 - [Schema](https://pkg.go.dev/github.com/RussellLuo/validating/v3#Schema)
 - [Value](https://pkg.go.dev/github.com/RussellLuo/validating/v3#Value)
-- [Slice/Array](https://pkg.go.dev/github.com/RussellLuo/validating/v3#Slice)
+- [Nested](https://pkg.go.dev/github.com/RussellLuo/validating/v3#Nested)
 - [Map](https://pkg.go.dev/github.com/RussellLuo/validating/v3#Map)
-- [Each](https://pkg.go.dev/github.com/RussellLuo/validating/v3#Each)
-- [EachMapValue](https://pkg.go.dev/github.com/RussellLuo/validating/v3#EachMapValue)
+- [Slice/Array](https://pkg.go.dev/github.com/RussellLuo/validating/v3#Slice)
 - [All/And](https://pkg.go.dev/github.com/RussellLuo/validating/v3#All)
 - [Any/Or](https://pkg.go.dev/github.com/RussellLuo/validating/v3#Any)
 - [Not](https://pkg.go.dev/github.com/RussellLuo/validating/v3#Not)
-- [Lazy](https://pkg.go.dev/github.com/RussellLuo/validating/v3#Lazy)
-- [Assert](https://pkg.go.dev/github.com/RussellLuo/validating/v3#Assert)
 - [Is](https://pkg.go.dev/github.com/RussellLuo/validating/v3#Is)
 - [Nonzero](https://pkg.go.dev/github.com/RussellLuo/validating/v3#Nonzero)
 - [Zero](https://pkg.go.dev/github.com/RussellLuo/validating/v3#Zero)
@@ -75,8 +72,8 @@ A validator factory is a function used to create a validator, which will do the 
 
 ### Validator customizations
 
-- [From a boolean expression](example_nested_struct_pointer_test.go#L24)
-- [From a function](example_customizations_test.go#L30-L32)
+- [From a boolean function](example_nested_struct_pointer_test.go#L24)
+- [From a normal function](example_customizations_test.go#L30-L32)
 - [From a struct](example_customizations_test.go#L35-L37)
 
 

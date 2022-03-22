@@ -11,25 +11,13 @@ func Example_simpleMap() {
 		"foo": 0,
 		"bar": 1,
 	}
-	err := v.Validate(v.Map(func() map[string]v.Schema {
+	err := v.Validate(v.Value(ages, v.Map(func(m map[string]int) map[string]v.Schema {
 		schemas := make(map[string]v.Schema)
-		for name, age := range ages {
+		for name, age := range m {
 			schemas[name] = v.Value(age, v.Nonzero[int]())
 		}
 		return schemas
-	}))
-	fmt.Printf("%+v\n", err)
-
-	// Output:
-	// [foo]: INVALID(is zero valued)
-}
-
-func Example_simpleMapEachMapValue() {
-	ages := map[string]int{
-		"foo": 0,
-		"bar": 1,
-	}
-	err := v.Validate(v.Value(ages, v.EachMapValue[map[string]int](v.Nonzero[int]())))
+	})))
 	fmt.Printf("%+v\n", err)
 
 	// Output:

@@ -8,21 +8,12 @@ import (
 
 func Example_simpleSlice() {
 	names := []string{"", "foo"}
-	err := v.Validate(v.Slice(func() (schemas []v.Schema) {
-		for _, name := range names {
+	err := v.Validate(v.Value(names, v.Slice(func(s []string) (schemas []v.Schema) {
+		for _, name := range s {
 			schemas = append(schemas, v.Value(name, v.Nonzero[string]()))
 		}
 		return schemas
-	}))
-	fmt.Printf("%+v\n", err)
-
-	// Output:
-	// [0]: INVALID(is zero valued)
-}
-
-func Example_simpleSliceEach() {
-	names := []string{"", "foo"}
-	err := v.Validate(v.Value(names, v.Each[[]string](v.Nonzero[string]())))
+	})))
 	fmt.Printf("%+v\n", err)
 
 	// Output:

@@ -21,11 +21,13 @@ func Example_nestedStruct() {
 	err := v.Validate(v.Schema{
 		v.F("name", p.Name): v.LenString(1, 5),
 		v.F("age", p.Age):   v.Gte(10),
-		v.F("address", p.Address): v.Schema{
-			v.F("country", p.Address.Country):   v.Nonzero[string](),
-			v.F("province", p.Address.Province): v.Nonzero[string](),
-			v.F("city", p.Address.City):         v.Nonzero[string](),
-		},
+		v.F("address", p.Address): v.Nested(func(addr Address) v.Validator {
+			return v.Schema{
+				v.F("country", addr.Country):   v.Nonzero[string](),
+				v.F("province", addr.Province): v.Nonzero[string](),
+				v.F("city", addr.City):         v.Nonzero[string](),
+			}
+		}),
 	})
 	fmt.Printf("err: %+v\n", err)
 }

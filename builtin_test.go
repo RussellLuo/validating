@@ -21,6 +21,180 @@ func makeErrsMap(errs v.Errors) map[string]v.Error {
 	return formatted
 }
 
+func TestNested(t *testing.T) {
+	cases := []struct {
+		name      string
+		value     interface{}
+		validator v.Validator
+		errs      v.Errors
+	}{
+		{
+			name:  "invalid",
+			value: struct{ Foo int }{Foo: 0},
+			validator: v.Nested(func(s struct{ Foo int }) v.Validator {
+				return v.Schema{
+					v.F("foo", s.Foo): v.Nonzero[int](),
+				}
+			}),
+			errs: v.NewErrors("foo", v.ErrInvalid, "is zero valued"),
+		},
+		{
+			name:  "valid",
+			value: struct{ Foo int }{Foo: 1},
+			validator: v.Nested(func(s struct{ Foo int }) v.Validator {
+				return v.Schema{
+					v.F("foo", s.Foo): v.Nonzero[int](),
+				}
+			}),
+			errs: nil,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			errs := v.Validate(v.Value(c.value, c.validator))
+			if !reflect.DeepEqual(makeErrsMap(errs), makeErrsMap(c.errs)) {
+				t.Errorf("Got (%+v) != Want (%+v)", errs, c.errs)
+			}
+		})
+	}
+}
+
+func TestMap(t *testing.T) {
+	type Stat struct {
+		Count int
+	}
+
+	cases := []struct {
+		name      string
+		value     interface{}
+		validator v.Validator
+		errs      v.Errors
+	}{
+		{
+			name:  "nil map",
+			value: map[string]Stat(nil),
+			validator: v.Map(func(m map[string]Stat) map[string]v.Schema {
+				return nil
+			}),
+			errs: nil,
+		},
+		{
+			name: "invalid",
+			value: map[string]Stat{
+				"visitor": {Count: 0},
+				"visit":   {Count: 0},
+			},
+			validator: v.Map(func(m map[string]Stat) map[string]v.Schema {
+				schemas := make(map[string]v.Schema)
+				for k, s := range m {
+					schemas[k] = v.Schema{
+						v.F("count", s.Count): v.Nonzero[int](),
+					}
+				}
+				return schemas
+			}),
+			errs: v.Errors{
+				v.NewError("stats[visitor].count", v.ErrInvalid, "is zero valued"),
+				v.NewError("stats[visit].count", v.ErrInvalid, "is zero valued"),
+			},
+		},
+		{
+			name: "valid",
+			value: map[string]Stat{
+				"visitor": {Count: 1},
+				"visit":   {Count: 2},
+			},
+			validator: v.Map(func(m map[string]Stat) map[string]v.Schema {
+				schemas := make(map[string]v.Schema)
+				for k, s := range m {
+					schemas[k] = v.Schema{
+						v.F("count", s.Count): v.Nonzero[int](),
+					}
+				}
+				return schemas
+			}),
+			errs: nil,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			errs := v.Validate(v.Schema{
+				v.F("stats", c.value): c.validator,
+			})
+			if !reflect.DeepEqual(makeErrsMap(errs), makeErrsMap(c.errs)) {
+				t.Errorf("Got (%+v) != Want (%+v)", errs, c.errs)
+			}
+		})
+	}
+}
+
+func TestSlice(t *testing.T) {
+	type Comment struct {
+		Content   string
+		CreatedAt time.Time
+	}
+
+	cases := []struct {
+		name      string
+		value     interface{}
+		validator v.Validator
+		errs      v.Errors
+	}{
+		{
+			name:  "nil slice",
+			value: []Comment(nil),
+			validator: v.Slice(func(s []Comment) (schemas []v.Schema) {
+				return nil
+			}),
+			errs: nil,
+		},
+		{
+			name: "invalid",
+			value: []Comment{
+				{Content: "", CreatedAt: time.Time{}},
+			},
+
+			validator: v.Slice(func(s []Comment) (schemas []v.Schema) {
+				for _, c := range s {
+					schemas = append(schemas, v.Schema{
+						v.F("content", c.Content):      v.Nonzero[string](),
+						v.F("created_at", c.CreatedAt): v.Nonzero[time.Time](),
+					})
+				}
+				return
+			}),
+			errs: v.Errors{
+				v.NewError("comments[0].content", v.ErrInvalid, "is zero valued"),
+				v.NewError("comments[0].created_at", v.ErrInvalid, "is zero valued"),
+			},
+		},
+		{
+			name:  "nil slice",
+			value: []Comment(nil),
+			validator: v.Slice(func(s []Comment) (schemas []v.Schema) {
+				for _, c := range s {
+					schemas = append(schemas, v.Schema{
+						v.F("content", c.Content):      v.Nonzero[string](),
+						v.F("created_at", c.CreatedAt): v.Nonzero[time.Time](),
+					})
+				}
+				return
+			}),
+			errs: nil,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			errs := v.Validate(v.Schema{
+				v.F("comments", c.value): c.validator,
+			})
+			if !reflect.DeepEqual(makeErrsMap(errs), makeErrsMap(c.errs)) {
+				t.Errorf("Got (%+v) != Want (%+v)", errs, c.errs)
+			}
+		})
+	}
+}
+
 func TestAll(t *testing.T) {
 	cases := []struct {
 		schema v.Schema
@@ -158,216 +332,47 @@ func TestNot(t *testing.T) {
 	}
 }
 
-func TestMap(t *testing.T) {
-	type Stat struct {
-		Count int
-	}
-
+func TestIs(t *testing.T) {
 	cases := []struct {
-		schemaMaker func() v.Schema
-		errs        v.Errors
+		name      string
+		value     interface{}
+		validator v.Validator
+		errs      v.Errors
 	}{
 		{
-			func() v.Schema {
-				return v.Schema{
-					v.F("stats", nil): v.Map(func() map[string]v.Schema {
-						return nil
-					}),
-				}
-			},
-			nil,
+			name:      "int invalid",
+			value:     0,
+			validator: v.Is(func(i int) bool { return i == 1 }),
+			errs:      v.NewErrors("value", v.ErrInvalid, "is invalid"),
 		},
 		{
-			func() v.Schema {
-				stats := map[string]Stat{
-					"visitor": {Count: 0},
-					"visit":   {Count: 0},
-				}
-				return v.Schema{
-					v.F("stats", stats): v.Map(func() map[string]v.Schema {
-						schemas := make(map[string]v.Schema)
-						for k, s := range stats {
-							schemas[k] = v.Schema{
-								v.F("count", s.Count): v.Nonzero[int](),
-							}
-						}
-						return schemas
-					}),
-				}
-			},
-			v.Errors{
-				v.NewError("stats[visitor].count", v.ErrInvalid, "is zero valued"),
-				v.NewError("stats[visit].count", v.ErrInvalid, "is zero valued"),
-			},
+			name:      "int valid",
+			value:     1,
+			validator: v.Is(func(i int) bool { return i == 1 }),
+			errs:      nil,
 		},
 		{
-			func() v.Schema {
-				stats := map[string]Stat{
-					"visitor": {Count: 1},
-					"visit":   {Count: 2},
-				}
-				return v.Schema{
-					v.F("stats", stats): v.Map(func() map[string]v.Schema {
-						schemas := make(map[string]v.Schema)
-						for k, s := range stats {
-							schemas[k] = v.Schema{
-								v.F("count", s.Count): v.Nonzero[int](),
-							}
-						}
-						return schemas
-					}),
-				}
-			},
-			nil,
+			name:      "string invalid",
+			value:     "",
+			validator: v.Is(func(s string) bool { return s == "a" }),
+			errs:      v.NewErrors("value", v.ErrInvalid, "is invalid"),
+		},
+		{
+			name:      "string valid",
+			value:     "a",
+			validator: v.Is(func(s string) bool { return s == "a" }),
+			errs:      nil,
 		},
 	}
 	for _, c := range cases {
-		errs := v.Validate(c.schemaMaker())
-		if !reflect.DeepEqual(makeErrsMap(errs), makeErrsMap(c.errs)) {
-			t.Errorf("Got (%+v) != Want (%+v)", errs, c.errs)
-		}
-	}
-}
-
-func TestSlice(t *testing.T) {
-	type Comment struct {
-		Content   string
-		CreatedAt time.Time
-	}
-
-	cases := []struct {
-		schemaMaker func() v.Schema
-		errs        v.Errors
-	}{
-		{
-			func() v.Schema {
-				return v.Schema{
-					v.F("comments", nil): v.Slice(func() []v.Schema {
-						return nil
-					}),
-				}
-			},
-			nil,
-		},
-		{
-			func() v.Schema {
-				comments := []Comment{
-					{Content: "", CreatedAt: time.Time{}},
-				}
-				return v.Schema{
-					v.F("comments", comments): v.Slice(func() (schemas []v.Schema) {
-						for _, c := range comments {
-							schemas = append(schemas, v.Schema{
-								v.F("content", c.Content):      v.Nonzero[string](),
-								v.F("created_at", c.CreatedAt): v.Nonzero[time.Time](),
-							})
-						}
-						return
-					}),
-				}
-			},
-			v.Errors{
-				v.NewError("comments[0].content", v.ErrInvalid, "is zero valued"),
-				v.NewError("comments[0].created_at", v.ErrInvalid, "is zero valued"),
-			},
-		},
-		{
-			func() v.Schema {
-				comments := []Comment{
-					{Content: "thanks", CreatedAt: time.Now()},
-				}
-				return v.Schema{
-					v.F("comments", comments): v.Slice(func() (schemas []v.Schema) {
-						for _, c := range comments {
-							schemas = append(schemas, v.Schema{
-								v.F("content", c.Content):      v.Nonzero[string](),
-								v.F("created_at", c.CreatedAt): v.Nonzero[time.Time](),
-							})
-						}
-						return
-					}),
-				}
-			},
-			nil,
-		},
-	}
-	for _, c := range cases {
-		errs := v.Validate(c.schemaMaker())
-		if !reflect.DeepEqual(makeErrsMap(errs), makeErrsMap(c.errs)) {
-			t.Errorf("Got (%+v) != Want (%+v)", errs, c.errs)
-		}
-	}
-}
-
-func TestLazy(t *testing.T) {
-	cases := []struct {
-		schemaMaker func(*bool) v.Schema
-		gotFlag     bool
-		wantFlag    bool
-	}{
-		{
-			schemaMaker: func(flag *bool) v.Schema {
-				return v.Schema{
-					v.F("title", ""): v.Lazy(func() v.Validator {
-						*flag = true
-						return v.LenString(2, 5)
-					}),
-				}
-			},
-			wantFlag: true,
-		},
-		{
-			schemaMaker: func(flag *bool) v.Schema {
-				return v.Schema{
-					v.F("title", ""): v.All(
-						v.Nonzero[string](),
-						v.Lazy(func() v.Validator {
-							*flag = true
-							return v.LenString(2, 5)
-						}),
-					),
-				}
-			},
-			wantFlag: false,
-		},
-	}
-	for _, c := range cases {
-		v.Validate(c.schemaMaker(&c.gotFlag)) // nolint:errcheck
-		if !reflect.DeepEqual(c.gotFlag, c.wantFlag) {
-			t.Errorf("Got (%+v) != Want (%+v)", c.gotFlag, c.wantFlag)
-		}
-	}
-}
-
-func TestAssert(t *testing.T) {
-	cases := []struct {
-		schema v.Schema
-		errs   v.Errors
-	}{
-		{
-			v.Schema{
-				v.F("value", nil): v.Assert(true),
-			},
-			nil,
-		},
-		{
-			v.Schema{
-				v.F("value", nil): v.Assert(false),
-			},
-			v.NewErrors("value", v.ErrInvalid, "is invalid"),
-		},
-		{
-			v.Schema{
-				v.F("value", nil): v.Assert(false).Msg("is not ok"),
-			},
-			v.NewErrors("value", v.ErrInvalid, "is not ok"),
-		},
-	}
-	for _, c := range cases {
-		errs := v.Validate(c.schema)
-		if !reflect.DeepEqual(makeErrsMap(errs), makeErrsMap(c.errs)) {
-			t.Errorf("Got (%+v) != Want (%+v)", errs, c.errs)
-		}
+		t.Run(c.name, func(t *testing.T) {
+			errs := v.Validate(v.Schema{
+				v.F("value", c.value): c.validator,
+			})
+			if !reflect.DeepEqual(makeErrsMap(errs), makeErrsMap(c.errs)) {
+				t.Errorf("Got (%+v) != Want (%+v)", errs, c.errs)
+			}
+		})
 	}
 }
 
