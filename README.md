@@ -72,7 +72,7 @@ A validator factory is a function used to create a validator, which will do the 
 
 ### Validator customizations
 
-- [From a boolean function](example_nested_struct_pointer_test.go#L24)
+- [From a boolean function](example_simple_string_isip_test.go#L16)
 - [From a normal function](example_customizations_test.go#L30-L32)
 - [From a struct](example_customizations_test.go#L35-L37)
 
