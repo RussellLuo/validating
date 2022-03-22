@@ -21,24 +21,6 @@ func makeSchema2(p *Person2) v.Schema {
 		v.F("name", p.Name): v.LenString(1, 5),
 		v.F("age", p.Age):   v.Lte(50),
 		v.F("address", p.Address): v.All(
-			v.Is(func(addr *Address2) bool { return addr != nil }).Msg("is nil"),
-			v.Nested(func(addr *Address2) v.Validator {
-				return v.Schema{
-					v.F("country", addr.Country):   v.Nonzero[string](),
-					v.F("province", addr.Province): v.Nonzero[string](),
-					v.F("city", addr.City):         v.Nonzero[string](),
-				}
-			}),
-		),
-	}
-}
-
-// makeSchema3 is equivalent to makeSchema2.
-func makeSchema3(p *Person2) v.Schema {
-	return v.Schema{
-		v.F("name", p.Name): v.LenString(1, 5),
-		v.F("age", p.Age):   v.Lte(50),
-		v.F("address", p.Address): v.All(
 			v.Nonzero[*Address2]().Msg("is nil"),
 			v.Nested(func(addr *Address2) v.Validator {
 				return v.Schema{
