@@ -21,12 +21,12 @@ func makeSchema2(p *Person2) v.Schema {
 		v.F("name", p.Name): v.LenString(1, 5),
 		v.F("age", p.Age):   v.Lte(50),
 		v.F("address", p.Address): v.All(
-			v.Assert(p.Address != nil).Msg("is nil"),
-			v.Lazy(func() v.Validator {
+			v.Is(func(addr *Address2) bool { return addr != nil }).Msg("is nil"),
+			v.Nested(func(addr *Address2) v.Validator {
 				return v.Schema{
-					v.F("country", p.Address.Country):   v.Nonzero[string](),
-					v.F("province", p.Address.Province): v.Nonzero[string](),
-					v.F("city", p.Address.City):         v.Nonzero[string](),
+					v.F("country", addr.Country):   v.Nonzero[string](),
+					v.F("province", addr.Province): v.Nonzero[string](),
+					v.F("city", addr.City):         v.Nonzero[string](),
 				}
 			}),
 		),

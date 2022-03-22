@@ -35,11 +35,51 @@ func Value(value interface{}, validator Validator) Schema {
 	}
 }
 
+// Nested is a composite validator factory used to create a validator, which will
+// delegate the actual validation to the schema returned by f.
+func Nested[T any](f func(T) Validator) Validator {
+	return Func(func(field *Field) Errors {
+		v, ok := field.Value.(T)
+		if !ok {
+			return NewUnsupportedErrors(field, "Nested")
+		}
+
+		return f(v).Validate(field)
+	})
+}
+
+// Map is a composite validator factory used to create a validator, which will
+// do the validation per the key/value schemas associated with a map.
+func Map[T map[K]V, K comparable, V any](f func(T) map[K]Schema) Validator {
+	return Func(func(field *Field) (errs Errors) {
+		v, ok := field.Value.(T)
+		if !ok {
+			return NewUnsupportedErrors(field, "Map")
+		}
+
+		schemas := f(v)
+		for k, s := range schemas {
+			err := validateSchema(s, field, func(name string) string {
+				return name + fmt.Sprintf("[%v]", k)
+			})
+			if err != nil {
+				errs.Append(err...)
+			}
+		}
+		return
+	})
+}
+
 // Slice is a composite validator factory used to create a validator, which will
 // do the validation per the schemas associated with a slice.
-func Slice(f func() []Schema) Validator {
-	schemas := f()
+func Slice[T ~[]E, E any](f func(T) []Schema) Validator {
 	return Func(func(field *Field) (errs Errors) {
+		v, ok := field.Value.(T)
+		if !ok {
+			return NewUnsupportedErrors(field, "Slice")
+		}
+
+		schemas := f(v)
 		for i, s := range schemas {
 			err := validateSchema(s, field, func(name string) string {
 				return name + "[" + strconv.Itoa(i) + "]"
@@ -53,68 +93,8 @@ func Slice(f func() []Schema) Validator {
 }
 
 // Array is an alias of Slice.
-var Array = Slice
-
-// Map is a composite validator factory used to create a validator, which will
-// do the validation per the schemas associated with a map.
-func Map(f func() map[string]Schema) Validator {
-	schemas := f()
-	return Func(func(field *Field) (errs Errors) {
-		for k, s := range schemas {
-			err := validateSchema(s, field, func(name string) string {
-				return name + "[" + k + "]"
-			})
-			if err != nil {
-				errs.Append(err...)
-			}
-		}
-		return
-	})
-}
-
-// Each is a composite validator factory used to create a validator, which will
-// succeed only when validator succeeds on all elements of the slice field.
-func Each[T ~[]E, E any](validator Validator) Validator {
-	return Func(func(field *Field) (errs Errors) {
-		v, ok := field.Value.(T)
-		if !ok {
-			return NewUnsupportedErrors(field, "Each")
-		}
-
-		for i, vv := range v {
-			schema := Value((interface{})(vv), validator)
-			err := validateSchema(schema, field, func(name string) string {
-				return name + "[" + strconv.Itoa(i) + "]"
-			})
-			if err != nil {
-				errs.Append(err...)
-			}
-		}
-
-		return
-	})
-}
-
-// EachMapValue is a composite validator factory used to create a validator, which will
-// succeed only when validator succeeds on all values of the map field.
-func EachMapValue[T map[K]V, K comparable, V any](validator Validator) Validator {
-	return Func(func(field *Field) (errs Errors) {
-		m, ok := field.Value.(T)
-		if !ok {
-			return NewUnsupportedErrors(field, "EachKeyValue")
-		}
-
-		for k, v := range m {
-			schema := Value((interface{})(v), validator)
-			err := validateSchema(schema, field, func(name string) string {
-				return name + fmt.Sprintf("[%v]", k)
-			})
-			if err != nil {
-				errs.Append(err...)
-			}
-		}
-		return
-	})
+func Array[T ~[]E, E any](f func(T) []Schema) Validator {
+	return Slice[T](f)
 }
 
 // MessageValidator is a validator that allows users to customize the INVALID
@@ -214,30 +194,6 @@ func Not(validator Validator) (mv *MessageValidator) {
 				}
 			}
 			return newErrs
-		}),
-	}
-	return
-}
-
-// Lazy is a composite validator factory used to create a validator, which will
-// call f only as needed, to delegate the actual validation to
-// the validator returned by f.
-func Lazy(f func() Validator) Validator {
-	return Func(func(field *Field) Errors {
-		return f().Validate(field)
-	})
-}
-
-// Assert is a leaf validator factory used to create a validator, which will
-// succeed only when the boolean expression evaluates to true.
-func Assert(b bool) (mv *MessageValidator) {
-	mv = &MessageValidator{
-		Message: "is invalid",
-		Validator: Func(func(field *Field) Errors {
-			if !b {
-				return NewErrors(field.Name, ErrInvalid, mv.Message)
-			}
-			return nil
 		}),
 	}
 	return
@@ -363,12 +319,12 @@ func RuneCount(min, max int) (mv *MessageValidator) {
 		Validator: Func(func(field *Field) Errors {
 			valid := false
 
-			switch t := field.Value.(type) {
+			switch v := field.Value.(type) {
 			case string:
-				l := utf8.RuneCountInString(t)
+				l := utf8.RuneCountInString(v)
 				valid = l >= min && l <= max
 			case []byte:
-				l := utf8.RuneCount(t)
+				l := utf8.RuneCount(v)
 				valid = l >= min && l <= max
 			default:
 				return NewUnsupportedErrors(field, "RuneCount")
@@ -587,11 +543,11 @@ func Match(re *regexp.Regexp) (mv *MessageValidator) {
 		Validator: Func(func(field *Field) Errors {
 			valid := false
 
-			switch t := field.Value.(type) {
+			switch v := field.Value.(type) {
 			case string:
-				valid = re.MatchString(t)
+				valid = re.MatchString(v)
 			case []byte:
-				valid = re.Match(t)
+				valid = re.Match(v)
 			default:
 				return NewUnsupportedErrors(field, "Match")
 			}

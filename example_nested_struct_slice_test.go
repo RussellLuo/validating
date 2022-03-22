@@ -20,8 +20,8 @@ func makeSchema4(p *Person4) v.Schema {
 	return v.Schema{
 		v.F("name", p.Name): v.LenString(1, 5),
 		v.F("age", p.Age):   v.Nonzero[int](),
-		v.F("phones", p.Phones): v.Slice(func() (schemas []v.Schema) {
-			for _, phone := range p.Phones {
+		v.F("phones", p.Phones): v.Slice(func(s []*Phone) (schemas []v.Schema) {
+			for _, phone := range s {
 				schemas = append(schemas, v.Schema{
 					v.F("number", phone.Number): v.Nonzero[string](),
 					v.F("remark", phone.Remark): v.LenString(5, 7),
