@@ -43,4 +43,7 @@ func Example_nestedStructSlice() {
 	}}
 	err = v.Validate(makeSchema4(&p2))
 	fmt.Printf("err of p2: %+v\n", err)
+
+	//err of p1: name: INVALID(has an invalid length), age: INVALID(is zero valued)
+	//err of p2: name: INVALID(has an invalid length), age: INVALID(is zero valued), phones[1].remark: INVALID(has an invalid length)
 }
