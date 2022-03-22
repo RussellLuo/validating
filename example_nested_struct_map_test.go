@@ -43,4 +43,7 @@ func Example_nestedStructMap() {
 	}}
 	err = v.Validate(makeSchema1(&p2))
 	fmt.Printf("err of p2: %+v\n", err)
+
+	//err of p1: name: INVALID(has an invalid length), age: INVALID(is zero valued)
+	//err of p2: name: INVALID(has an invalid length), age: INVALID(is zero valued), family[mother].name: INVALID(is too long)
 }

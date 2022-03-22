@@ -36,4 +36,6 @@ func Example_nestedStructSchemaInside() {
 	p := Person3{}
 	err := v.Validate(p.Schema())
 	fmt.Printf("err: %+v\n", err)
+
+	//err: name: INVALID(has an invalid length), age: INVALID(is lower than the given value), address.country: INVALID(is zero valued), address.province: INVALID(is zero valued), address.city: INVALID(is zero valued)
 }
