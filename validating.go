@@ -3,11 +3,11 @@ package validating
 // Field represents a (Name, Value) pair that needs to be validated.
 type Field struct {
 	Name  string
-	Value interface{}
+	Value any
 }
 
 // F is a shortcut for creating a pointer to Field.
-func F(name string, value interface{}) *Field {
+func F(name string, value any) *Field {
 	return &Field{Name: name, Value: value}
 }
 

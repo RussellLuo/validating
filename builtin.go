@@ -29,14 +29,14 @@ func (s Schema) Validate(field *Field) (errs Errors) {
 }
 
 // Value is a shortcut function used to create a schema for a simple value.
-func Value(value interface{}, validator Validator) Schema {
+func Value(value any, validator Validator) Schema {
 	return Schema{
 		F("", value): validator,
 	}
 }
 
 // Nested is a composite validator factory used to create a validator, which will
-// delegate the actual validation to the schema returned by f.
+// delegate the actual validation to the validator returned by f.
 func Nested[T any](f func(T) Validator) Validator {
 	return Func(func(field *Field) Errors {
 		v, ok := field.Value.(T)
@@ -49,7 +49,7 @@ func Nested[T any](f func(T) Validator) Validator {
 }
 
 // Map is a composite validator factory used to create a validator, which will
-// do the validation per the key/value schemas associated with a map.
+// do the validation per the schemas associated with a map.
 func Map[T map[K]V, K comparable, V any](f func(T) map[K]Schema) Validator {
 	return Func(func(field *Field) (errs Errors) {
 		v, ok := field.Value.(T)

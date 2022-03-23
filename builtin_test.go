@@ -24,7 +24,7 @@ func makeErrsMap(errs v.Errors) map[string]v.Error {
 func TestNested(t *testing.T) {
 	cases := []struct {
 		name      string
-		value     interface{}
+		value     any
 		validator v.Validator
 		errs      v.Errors
 	}{
@@ -66,7 +66,7 @@ func TestMap(t *testing.T) {
 
 	cases := []struct {
 		name      string
-		value     interface{}
+		value     any
 		validator v.Validator
 		errs      v.Errors
 	}{
@@ -136,7 +136,7 @@ func TestSlice(t *testing.T) {
 
 	cases := []struct {
 		name      string
-		value     interface{}
+		value     any
 		validator v.Validator
 		errs      v.Errors
 	}{
@@ -335,7 +335,7 @@ func TestNot(t *testing.T) {
 func TestIs(t *testing.T) {
 	cases := []struct {
 		name      string
-		value     interface{}
+		value     any
 		validator v.Validator
 		errs      v.Errors
 	}{
@@ -378,7 +378,7 @@ func TestIs(t *testing.T) {
 
 func TestNonzero(t *testing.T) {
 	cases := []struct {
-		value     interface{}
+		value     any
 		validator v.Validator
 		errs      v.Errors
 	}{
@@ -445,7 +445,7 @@ func TestNonzero(t *testing.T) {
 
 func TestZero(t *testing.T) {
 	cases := []struct {
-		value     interface{}
+		value     any
 		validator v.Validator
 		errs      v.Errors
 	}{
@@ -512,7 +512,7 @@ func TestZero(t *testing.T) {
 
 func TestLenString(t *testing.T) {
 	cases := []struct {
-		value     interface{}
+		value     any
 		validator v.Validator
 		errs      v.Errors
 	}{
@@ -549,7 +549,7 @@ func TestLenString(t *testing.T) {
 
 func TestLenSlice(t *testing.T) {
 	cases := []struct {
-		value     interface{}
+		value     any
 		validator v.Validator
 		errs      v.Errors
 	}{
@@ -601,7 +601,7 @@ func TestLenSlice(t *testing.T) {
 
 func TestRuneCount(t *testing.T) {
 	cases := []struct {
-		value     interface{}
+		value     any
 		validator v.Validator
 		errs      v.Errors
 	}{
@@ -1062,7 +1062,7 @@ func TestIn_Nin(t *testing.T) {
 func TestMatch(t *testing.T) {
 	cases := []struct {
 		name      string
-		value     interface{}
+		value     any
 		validator v.Validator
 		errs      v.Errors
 	}{
