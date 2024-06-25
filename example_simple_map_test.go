@@ -11,10 +11,10 @@ func Example_simpleMap() {
 		"foo": 0,
 		"bar": 1,
 	}
-	err := v.Validate(v.Value(ages, v.Map(func(m map[string]int) map[string]v.Schema {
-		schemas := make(map[string]v.Schema)
-		for name, age := range m {
-			schemas[name] = v.Value(age, v.Nonzero[int]())
+	err := v.Validate(v.Value(ages, v.Map(func(m map[string]int) map[string]v.Validator {
+		schemas := make(map[string]v.Validator)
+		for name := range m {
+			schemas[name] = v.Nonzero[int]()
 		}
 		return schemas
 	})))

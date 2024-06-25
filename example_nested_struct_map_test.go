@@ -20,8 +20,8 @@ func makeSchema1(p *Person1) v.Schema {
 	return v.Schema{
 		v.F("name", p.Name): v.LenString(1, 5),
 		v.F("age", p.Age):   v.Nonzero[int](),
-		v.F("family", p.Family): v.Map(func(m map[string]*Member) map[string]v.Schema {
-			schemas := make(map[string]v.Schema)
+		v.F("family", p.Family): v.Map(func(m map[string]*Member) map[string]v.Validator {
+			schemas := make(map[string]v.Validator)
 			for relation, member := range m {
 				schemas[relation] = v.Schema{
 					v.F("name", member.Name): v.LenString(10, 15).Msg("is too long"),

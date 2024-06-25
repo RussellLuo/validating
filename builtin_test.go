@@ -73,7 +73,7 @@ func TestMap(t *testing.T) {
 		{
 			name:  "nil map",
 			value: map[string]Stat(nil),
-			validator: v.Map(func(m map[string]Stat) map[string]v.Schema {
+			validator: v.Map(func(m map[string]Stat) map[string]v.Validator {
 				return nil
 			}),
 			errs: nil,
@@ -84,8 +84,8 @@ func TestMap(t *testing.T) {
 				"visitor": {Count: 0},
 				"visit":   {Count: 0},
 			},
-			validator: v.Map(func(m map[string]Stat) map[string]v.Schema {
-				schemas := make(map[string]v.Schema)
+			validator: v.Map(func(m map[string]Stat) map[string]v.Validator {
+				schemas := make(map[string]v.Validator)
 				for k, s := range m {
 					schemas[k] = v.Schema{
 						v.F("count", s.Count): v.Nonzero[int](),
@@ -104,8 +104,8 @@ func TestMap(t *testing.T) {
 				"visitor": {Count: 1},
 				"visit":   {Count: 2},
 			},
-			validator: v.Map(func(m map[string]Stat) map[string]v.Schema {
-				schemas := make(map[string]v.Schema)
+			validator: v.Map(func(m map[string]Stat) map[string]v.Validator {
+				schemas := make(map[string]v.Validator)
 				for k, s := range m {
 					schemas[k] = v.Schema{
 						v.F("count", s.Count): v.Nonzero[int](),
@@ -114,6 +114,24 @@ func TestMap(t *testing.T) {
 				return schemas
 			}),
 			errs: nil,
+		},
+		{
+			name: "int map",
+			value: map[string]int{
+				"k1": 1,
+				"k2": 2,
+				"k3": 3,
+			},
+			validator: v.Map(func(m map[string]int) map[string]v.Validator {
+				schemas := make(map[string]v.Validator)
+				for k := range m {
+					schemas[k] = v.Range[int](1, 2)
+				}
+				return schemas
+			}),
+			errs: v.Errors{
+				v.NewError("stats[k3]", v.ErrInvalid, "is not between the given range"),
+			},
 		},
 	}
 	for _, c := range cases {
@@ -143,7 +161,7 @@ func TestSlice(t *testing.T) {
 		{
 			name:  "nil slice",
 			value: []Comment(nil),
-			validator: v.Slice(func(s []Comment) (schemas []v.Schema) {
+			validator: v.Slice(func(s []Comment) (schemas []v.Validator) {
 				return nil
 			}),
 			errs: nil,
@@ -154,7 +172,7 @@ func TestSlice(t *testing.T) {
 				{Content: "", CreatedAt: time.Time{}},
 			},
 
-			validator: v.Slice(func(s []Comment) (schemas []v.Schema) {
+			validator: v.Slice(func(s []Comment) (schemas []v.Validator) {
 				for _, c := range s {
 					schemas = append(schemas, v.Schema{
 						v.F("content", c.Content):      v.Nonzero[string](),
@@ -171,7 +189,7 @@ func TestSlice(t *testing.T) {
 		{
 			name:  "nil slice",
 			value: []Comment(nil),
-			validator: v.Slice(func(s []Comment) (schemas []v.Schema) {
+			validator: v.Slice(func(s []Comment) (schemas []v.Validator) {
 				for _, c := range s {
 					schemas = append(schemas, v.Schema{
 						v.F("content", c.Content):      v.Nonzero[string](),
@@ -181,6 +199,19 @@ func TestSlice(t *testing.T) {
 				return
 			}),
 			errs: nil,
+		},
+		{
+			name:  "int slice",
+			value: []int{1, 2, 3},
+			validator: v.Slice(func(s []int) (schemas []v.Validator) {
+				for range s {
+					schemas = append(schemas, v.Range[int](1, 2))
+				}
+				return
+			}),
+			errs: v.Errors{
+				v.NewError("comments[2]", v.ErrInvalid, "is not between the given range"),
+			},
 		},
 	}
 	for _, c := range cases {

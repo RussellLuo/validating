@@ -8,9 +8,9 @@ import (
 
 func Example_simpleSlice() {
 	names := []string{"", "foo"}
-	err := v.Validate(v.Value(names, v.Slice(func(s []string) (schemas []v.Schema) {
-		for _, name := range s {
-			schemas = append(schemas, v.Value(name, v.Nonzero[string]()))
+	err := v.Validate(v.Value(names, v.Slice(func(s []string) (schemas []v.Validator) {
+		for range s {
+			schemas = append(schemas, v.Nonzero[string]())
 		}
 		return schemas
 	})))

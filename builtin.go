@@ -50,15 +50,16 @@ func Nested[T any](f func(T) Validator) Validator {
 
 // Map is a composite validator factory used to create a validator, which will
 // do the validation per the schemas associated with a map.
-func Map[T map[K]V, K comparable, V any](f func(T) map[K]Schema) Validator {
+func Map[T map[K]V, K comparable, V any](f func(T) map[K]Validator) Validator {
 	return Func(func(field *Field) (errs Errors) {
 		v, ok := field.Value.(T)
 		if !ok {
 			return NewUnsupportedErrors(field, "Map")
 		}
 
-		schemas := f(v)
-		for k, s := range schemas {
+		validators := f(v)
+		for k, validator := range validators {
+			s := toSchema(v[k], validator)
 			err := validateSchema(s, field, func(name string) string {
 				return name + fmt.Sprintf("[%v]", k)
 			})
@@ -72,15 +73,16 @@ func Map[T map[K]V, K comparable, V any](f func(T) map[K]Schema) Validator {
 
 // Slice is a composite validator factory used to create a validator, which will
 // do the validation per the schemas associated with a slice.
-func Slice[T ~[]E, E any](f func(T) []Schema) Validator {
+func Slice[T ~[]E, E any](f func(T) []Validator) Validator {
 	return Func(func(field *Field) (errs Errors) {
 		v, ok := field.Value.(T)
 		if !ok {
 			return NewUnsupportedErrors(field, "Slice")
 		}
 
-		schemas := f(v)
-		for i, s := range schemas {
+		validators := f(v)
+		for i, validator := range validators {
+			s := toSchema(v[i], validator)
 			err := validateSchema(s, field, func(name string) string {
 				return name + "[" + strconv.Itoa(i) + "]"
 			})
@@ -93,7 +95,7 @@ func Slice[T ~[]E, E any](f func(T) []Schema) Validator {
 }
 
 // Array is an alias of Slice.
-func Array[T ~[]E, E any](f func(T) []Schema) Validator {
+func Array[T ~[]E, E any](f func(T) []Validator) Validator {
 	return Slice[T](f)
 }
 
@@ -559,6 +561,15 @@ func Match(re *regexp.Regexp) (mv *MessageValidator) {
 		}),
 	}
 	return
+}
+
+// toSchema converts the given validator to a Schema if it's not already.
+func toSchema(value any, validator Validator) Schema {
+	s, ok := validator.(Schema)
+	if !ok {
+		s = Value(value, validator)
+	}
+	return s
 }
 
 // validateSchema do the validation per the given schema, which is associated
