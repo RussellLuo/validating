@@ -31,6 +31,61 @@ $ go get github.com/RussellLuo/validating/v3@latest
 ```
 
 
+## Quick Start
+
+```go
+package main
+
+import (
+	"fmt"
+
+	v "github.com/RussellLuo/validating/v3"
+)
+
+type Address struct {
+	Country string
+	City    string
+}
+
+func (a Address) Schema() v.Schema {
+	return v.Schema{
+		v.F("country", a.Country): v.Nonzero[string]().Msg("empty country"),
+		v.F("city", a.City):       v.In("A", "B", "C").Msg("must be A or B or C"),
+	}
+}
+
+type Person struct {
+	Name    string
+	Age     int
+	Address Address
+}
+
+func (p Person) Schema() v.Schema {
+	return v.Schema{
+		v.F("name", p.Name):       v.LenString(1, 5).Msg("bad name"),
+		v.F("age", p.Age):         v.Gte(10).Msg("must be older than 10 years old"),
+		v.F("address", p.Address): p.Address.Schema(),
+	}
+}
+
+func main() {
+	p := Person{}
+	errs := v.Validate(p.Schema())
+	for _, err := range errs {
+		fmt.Println(err)
+	}
+}
+```
+
+```bash
+$ go run main.go
+name: INVALID(bad name)
+age: INVALID(must be older than 10 years old)
+address.country: INVALID(empty country)
+address.city: INVALID(must be A or B or C)
+```
+
+
 ## Validator factories and validators
 
 To be strict, this library has a conceptual distinction between `validator factory` and `validator`.
