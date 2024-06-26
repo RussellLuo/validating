@@ -469,7 +469,7 @@ func TestNot(t *testing.T) {
 			v.Schema{
 				v.F("value", []string{"foo"}): v.Not(v.Eq("foo")),
 			},
-			v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Eq` on type []string"),
+			v.NewErrors("value", v.ErrUnsupported, "Eq expected string but got []string"),
 		},
 		{
 			v.Schema{
@@ -691,7 +691,7 @@ func TestLenString(t *testing.T) {
 		{
 			value:     0,
 			validator: v.LenString(1, 2),
-			errs:      v.NewErrors("value", v.ErrUnsupported, "cannot use validator `LenString` on type int"),
+			errs:      v.NewErrors("value", v.ErrUnsupported, "LenString expected string but got int"),
 		},
 		{
 			value:     "",
@@ -728,7 +728,7 @@ func TestLenSlice(t *testing.T) {
 		{
 			value:     "",
 			validator: v.LenSlice[[]string](1, 2),
-			errs:      v.NewErrors("value", v.ErrUnsupported, "cannot use validator `LenSlice` on type string"),
+			errs:      v.NewErrors("value", v.ErrUnsupported, "LenSlice expected []string but got string"),
 		},
 		{
 			value:     []int(nil),
@@ -780,7 +780,7 @@ func TestRuneCount(t *testing.T) {
 		{
 			value:     0,
 			validator: v.RuneCount(1, 2),
-			errs:      v.NewErrors("value", v.ErrUnsupported, "cannot use validator `RuneCount` on type int"),
+			errs:      v.NewErrors("value", v.ErrUnsupported, "RuneCount expected string or []byte but got int"),
 		},
 		{
 			value:     "",
@@ -1241,7 +1241,7 @@ func TestMatch(t *testing.T) {
 		{
 			value:     0,
 			validator: v.Match(regexp.MustCompile(``)),
-			errs:      v.NewErrors("value", v.ErrUnsupported, "cannot use validator `Match` on type int"),
+			errs:      v.NewErrors("value", v.ErrUnsupported, "Match expected string or []byte but got int"),
 		},
 		{
 			value:     "x13012345678",

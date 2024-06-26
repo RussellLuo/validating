@@ -10,7 +10,8 @@ import (
 func mapNonzero(field *v.Field) v.Errors {
 	value, ok := field.Value.(map[string]time.Time)
 	if !ok {
-		return v.NewUnsupportedErrors(field, "mapNonzero")
+		var want map[string]time.Time
+		return v.NewUnsupportedErrors("mapNonzero", field, want)
 	}
 	if len(value) == 0 {
 		return v.NewErrors(field.Name, v.ErrInvalid, "is zero valued")

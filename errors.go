@@ -23,8 +23,21 @@ func NewErrors(field, kind, message string) Errors {
 	return []Error{NewError(field, kind, message)}
 }
 
-func NewUnsupportedErrors(field *Field, validatorName string) Errors {
-	return NewErrors(field.Name, ErrUnsupported, fmt.Sprintf("cannot use validator `%s` on type %T", validatorName, field.Value))
+func NewUnsupportedErrors(validatorName string, field *Field, want ...any) Errors {
+	var wantTypes []string
+	for _, w := range want {
+		t := fmt.Sprintf("%T", w)
+		if t == "[]uint8" {
+			t = "[]byte" // []uint8 => []byte
+		}
+		wantTypes = append(wantTypes, t)
+	}
+	expected := strings.Join(wantTypes, " or ")
+	return NewErrors(field.Name, ErrUnsupported, fmt.Sprintf("%s expected %s but got %T", validatorName, expected, field.Value))
+}
+
+func NewInvalidErrors(field *Field, msg string) Errors {
+	return NewErrors(field.Name, ErrInvalid, msg)
 }
 
 func (e *Errors) Append(errs ...Error) {

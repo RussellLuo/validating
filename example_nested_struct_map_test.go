@@ -29,6 +29,7 @@ func makeSchema1(p *Person1) v.Schema {
 }
 
 // The equivalent implementation using Map.
+//
 //nolint:golint,unused
 func makeSchema1_Map(p *Person1) v.Schema {
 	return v.Schema{

@@ -30,6 +30,7 @@ func makeSchema4(p *Person4) v.Schema {
 }
 
 // The equivalent implementation using Slice.
+//
 //nolint:golint,unused
 func makeSchema4_Slice(p *Person4) v.Schema {
 	return v.Schema{

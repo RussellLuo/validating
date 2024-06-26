@@ -41,7 +41,8 @@ func Nested[T any](f func(T) Validator) Validator {
 	return Func(func(field *Field) Errors {
 		v, ok := field.Value.(T)
 		if !ok {
-			return NewUnsupportedErrors(field, "Nested")
+			var want T
+			return NewUnsupportedErrors("Nested", field, want)
 		}
 
 		return f(v).Validate(field)
@@ -58,7 +59,8 @@ func EachMap[T map[K]V, K comparable, V any](validator Validator) Validator {
 	return Func(func(field *Field) (errs Errors) {
 		v, ok := field.Value.(T)
 		if !ok {
-			return NewUnsupportedErrors(field, "EachMap")
+			var want T
+			return NewUnsupportedErrors("EachMap", field, want)
 		}
 
 		for k := range v {
@@ -84,7 +86,8 @@ func EachSlice[T ~[]E, E any](validator Validator) Validator {
 	return Func(func(field *Field) (errs Errors) {
 		v, ok := field.Value.(T)
 		if !ok {
-			return NewUnsupportedErrors(field, "EachSlice")
+			var want T
+			return NewUnsupportedErrors("EachSlice", field, want)
 		}
 
 		for i := range v {
@@ -106,7 +109,8 @@ func Map[T map[K]V, K comparable, V any](f func(T) map[K]Validator) Validator {
 	return Func(func(field *Field) (errs Errors) {
 		v, ok := field.Value.(T)
 		if !ok {
-			return NewUnsupportedErrors(field, "Map")
+			var want T
+			return NewUnsupportedErrors("Map", field, want)
 		}
 
 		validators := f(v)
@@ -129,7 +133,8 @@ func Slice[T ~[]E, E any](f func(T) []Validator) Validator {
 	return Func(func(field *Field) (errs Errors) {
 		v, ok := field.Value.(T)
 		if !ok {
-			return NewUnsupportedErrors(field, "Slice")
+			var want T
+			return NewUnsupportedErrors("Slice", field, want)
 		}
 
 		validators := f(v)
@@ -237,7 +242,7 @@ func Not(validator Validator) (mv *MessageValidator) {
 		Validator: Func(func(field *Field) Errors {
 			errs := validator.Validate(field)
 			if len(errs) == 0 {
-				return NewErrors(field.Name, ErrInvalid, mv.Message)
+				return NewInvalidErrors(field, mv.Message)
 			}
 
 			var newErrs Errors
@@ -261,11 +266,12 @@ func Is[T any](f func(T) bool) (mv *MessageValidator) {
 		Validator: Func(func(field *Field) Errors {
 			v, ok := field.Value.(T)
 			if !ok {
-				return NewUnsupportedErrors(field, "Is")
+				var want T
+				return NewUnsupportedErrors("Is", field, want)
 			}
 
 			if !f(v) {
-				return NewErrors(field.Name, ErrInvalid, mv.Message)
+				return NewInvalidErrors(field, mv.Message)
 			}
 			return nil
 		}),
@@ -281,12 +287,13 @@ func Nonzero[T comparable]() (mv *MessageValidator) {
 		Validator: Func(func(field *Field) Errors {
 			v, ok := field.Value.(T)
 			if !ok {
-				return NewUnsupportedErrors(field, "Nonzero")
+				var want T
+				return NewUnsupportedErrors("Nonzero", field, want)
 			}
 
 			var zero T
 			if v == zero {
-				return NewErrors(field.Name, ErrInvalid, mv.Message)
+				return NewInvalidErrors(field, mv.Message)
 			}
 			return nil
 		}),
@@ -302,12 +309,13 @@ func Zero[T comparable]() (mv *MessageValidator) {
 		Validator: Func(func(field *Field) Errors {
 			v, ok := field.Value.(T)
 			if !ok {
-				return NewUnsupportedErrors(field, "Nonzero")
+				var want T
+				return NewUnsupportedErrors("Zero", field, want)
 			}
 
 			var zero T
 			if v != zero {
-				return NewErrors(field.Name, ErrInvalid, mv.Message)
+				return NewInvalidErrors(field, mv.Message)
 			}
 			return nil
 		}),
@@ -331,12 +339,13 @@ func LenString(min, max int) (mv *MessageValidator) {
 		Validator: Func(func(field *Field) Errors {
 			v, ok := field.Value.(string)
 			if !ok {
-				return NewUnsupportedErrors(field, "LenString")
+				var want string
+				return NewUnsupportedErrors("LenString", field, want)
 			}
 
 			l := len(v)
 			if l < min || l > max {
-				return NewErrors(field.Name, ErrInvalid, mv.Message)
+				return NewInvalidErrors(field, mv.Message)
 			}
 			return nil
 		}),
@@ -352,12 +361,13 @@ func LenSlice[T ~[]E, E any](min, max int) (mv *MessageValidator) {
 		Validator: Func(func(field *Field) Errors {
 			v, ok := field.Value.(T)
 			if !ok {
-				return NewUnsupportedErrors(field, "LenSlice")
+				var want T
+				return NewUnsupportedErrors("LenSlice", field, want)
 			}
 
 			l := len(v)
 			if l < min || l > max {
-				return NewErrors(field.Name, ErrInvalid, mv.Message)
+				return NewInvalidErrors(field, mv.Message)
 			}
 			return nil
 		}),
@@ -381,11 +391,11 @@ func RuneCount(min, max int) (mv *MessageValidator) {
 				l := utf8.RuneCount(v)
 				valid = l >= min && l <= max
 			default:
-				return NewUnsupportedErrors(field, "RuneCount")
+				return NewUnsupportedErrors("RuneCount", field, "", []byte(nil))
 			}
 
 			if !valid {
-				return NewErrors(field.Name, ErrInvalid, mv.Message)
+				return NewInvalidErrors(field, mv.Message)
 			}
 			return nil
 		}),
@@ -401,11 +411,12 @@ func Eq[T comparable](value T) (mv *MessageValidator) {
 		Validator: Func(func(field *Field) Errors {
 			v, ok := field.Value.(T)
 			if !ok {
-				return NewUnsupportedErrors(field, "Eq")
+				var want T
+				return NewUnsupportedErrors("Eq", field, want)
 			}
 
 			if v != value {
-				return NewErrors(field.Name, ErrInvalid, mv.Message)
+				return NewInvalidErrors(field, mv.Message)
 			}
 			return nil
 		}),
@@ -421,11 +432,12 @@ func Ne[T comparable](value T) (mv *MessageValidator) {
 		Validator: Func(func(field *Field) Errors {
 			v, ok := field.Value.(T)
 			if !ok {
-				return NewUnsupportedErrors(field, "Ne")
+				var want T
+				return NewUnsupportedErrors("Ne", field, want)
 			}
 
 			if v == value {
-				return NewErrors(field.Name, ErrInvalid, mv.Message)
+				return NewInvalidErrors(field, mv.Message)
 			}
 			return nil
 		}),
@@ -441,11 +453,12 @@ func Gt[T constraints.Ordered](value T) (mv *MessageValidator) {
 		Validator: Func(func(field *Field) Errors {
 			v, ok := field.Value.(T)
 			if !ok {
-				return NewUnsupportedErrors(field, "Gt")
+				var want T
+				return NewUnsupportedErrors("Gt", field, want)
 			}
 
 			if v <= value {
-				return NewErrors(field.Name, ErrInvalid, mv.Message)
+				return NewInvalidErrors(field, mv.Message)
 			}
 			return nil
 		}),
@@ -461,11 +474,12 @@ func Gte[T constraints.Ordered](value T) (mv *MessageValidator) {
 		Validator: Func(func(field *Field) Errors {
 			v, ok := field.Value.(T)
 			if !ok {
-				return NewUnsupportedErrors(field, "Gte")
+				var want T
+				return NewUnsupportedErrors("Gte", field, want)
 			}
 
 			if v < value {
-				return NewErrors(field.Name, ErrInvalid, mv.Message)
+				return NewInvalidErrors(field, mv.Message)
 			}
 			return nil
 		}),
@@ -481,11 +495,12 @@ func Lt[T constraints.Ordered](value T) (mv *MessageValidator) {
 		Validator: Func(func(field *Field) Errors {
 			v, ok := field.Value.(T)
 			if !ok {
-				return NewUnsupportedErrors(field, "Lt")
+				var want T
+				return NewUnsupportedErrors("Lt", field, want)
 			}
 
 			if v >= value {
-				return NewErrors(field.Name, ErrInvalid, mv.Message)
+				return NewInvalidErrors(field, mv.Message)
 			}
 			return nil
 		}),
@@ -501,11 +516,12 @@ func Lte[T constraints.Ordered](value T) (mv *MessageValidator) {
 		Validator: Func(func(field *Field) Errors {
 			v, ok := field.Value.(T)
 			if !ok {
-				return NewUnsupportedErrors(field, "Lte")
+				var want T
+				return NewUnsupportedErrors("Lte", field, want)
 			}
 
 			if v > value {
-				return NewErrors(field.Name, ErrInvalid, mv.Message)
+				return NewInvalidErrors(field, mv.Message)
 			}
 			return nil
 		}),
@@ -521,11 +537,12 @@ func Range[T constraints.Ordered](min, max T) (mv *MessageValidator) {
 		Validator: Func(func(field *Field) Errors {
 			v, ok := field.Value.(T)
 			if !ok {
-				return NewUnsupportedErrors(field, "Range")
+				var want T
+				return NewUnsupportedErrors("Range", field, want)
 			}
 
 			if v < min || v > max {
-				return NewErrors(field.Name, ErrInvalid, mv.Message)
+				return NewInvalidErrors(field, mv.Message)
 			}
 			return nil
 		}),
@@ -541,7 +558,8 @@ func In[T comparable](values ...T) (mv *MessageValidator) {
 		Validator: Func(func(field *Field) Errors {
 			v, ok := field.Value.(T)
 			if !ok {
-				return NewUnsupportedErrors(field, "In")
+				var want T
+				return NewUnsupportedErrors("In", field, want)
 			}
 
 			valid := false
@@ -553,7 +571,7 @@ func In[T comparable](values ...T) (mv *MessageValidator) {
 			}
 
 			if !valid {
-				return NewErrors(field.Name, ErrInvalid, mv.Message)
+				return NewInvalidErrors(field, mv.Message)
 			}
 			return nil
 		}),
@@ -569,7 +587,8 @@ func Nin[T comparable](values ...T) (mv *MessageValidator) {
 		Validator: Func(func(field *Field) Errors {
 			v, ok := field.Value.(T)
 			if !ok {
-				return NewUnsupportedErrors(field, "Nin")
+				var want T
+				return NewUnsupportedErrors("Nin", field, want)
 			}
 
 			valid := true
@@ -581,7 +600,7 @@ func Nin[T comparable](values ...T) (mv *MessageValidator) {
 			}
 
 			if !valid {
-				return NewErrors(field.Name, ErrInvalid, mv.Message)
+				return NewInvalidErrors(field, mv.Message)
 			}
 			return nil
 		}),
@@ -603,11 +622,11 @@ func Match(re *regexp.Regexp) (mv *MessageValidator) {
 			case []byte:
 				valid = re.Match(v)
 			default:
-				return NewUnsupportedErrors(field, "Match")
+				return NewUnsupportedErrors("Match", field, "", []byte(nil))
 			}
 
 			if !valid {
-				return NewErrors(field.Name, ErrInvalid, mv.Message)
+				return NewInvalidErrors(field, mv.Message)
 			}
 			return nil
 		}),
