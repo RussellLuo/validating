@@ -48,6 +48,58 @@ func Nested[T any](f func(T) Validator) Validator {
 	})
 }
 
+// EachMap is a composite validator factory used to create a validator, which will
+// apply the given validator to each element (i.e. the map value) of the map field.
+//
+// Usually, for simplicity, it's recommended to use EachMap. If you have more
+// complex validation rules for map elements, such as different validation for
+// each value or validation specific to keys, then you should use Map.
+func EachMap[T map[K]V, K comparable, V any](validator Validator) Validator {
+	return Func(func(field *Field) (errs Errors) {
+		v, ok := field.Value.(T)
+		if !ok {
+			return NewUnsupportedErrors(field, "EachMap")
+		}
+
+		for k := range v {
+			s := toSchema(v[k], validator)
+			err := validateSchema(s, field, func(name string) string {
+				return name + fmt.Sprintf("[%v]", k)
+			})
+			if err != nil {
+				errs.Append(err...)
+			}
+		}
+		return
+	})
+}
+
+// EachSlice is a composite validator factory used to create a validator, which will
+// apply the given validator to each element of the slice field.
+//
+// Usually, for simplicity, it's recommended to use EachSlice. If you have more
+// complex validation rules for slice elements, such as different validation for
+// each element, then you should use Slice.
+func EachSlice[T ~[]E, E any](validator Validator) Validator {
+	return Func(func(field *Field) (errs Errors) {
+		v, ok := field.Value.(T)
+		if !ok {
+			return NewUnsupportedErrors(field, "EachSlice")
+		}
+
+		for i := range v {
+			s := toSchema(v[i], validator)
+			err := validateSchema(s, field, func(name string) string {
+				return name + "[" + strconv.Itoa(i) + "]"
+			})
+			if err != nil {
+				errs.Append(err...)
+			}
+		}
+		return
+	})
+}
+
 // Map is a composite validator factory used to create a validator, which will
 // do the validation per the schemas associated with a map.
 func Map[T map[K]V, K comparable, V any](f func(T) map[K]Validator) Validator {

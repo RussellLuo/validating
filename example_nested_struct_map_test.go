@@ -20,6 +20,19 @@ func makeSchema1(p *Person1) v.Schema {
 	return v.Schema{
 		v.F("name", p.Name): v.LenString(1, 5),
 		v.F("age", p.Age):   v.Nonzero[int](),
+		v.F("family", p.Family): v.EachMap[map[string]*Member](v.Nested(func(member *Member) v.Validator {
+			return v.Schema{
+				v.F("name", member.Name): v.LenString(10, 15).Msg("is too long"),
+			}
+		})),
+	}
+}
+
+// The equivalent implementation using Map.
+func makeSchema1_Map(p *Person1) v.Schema {
+	return v.Schema{
+		v.F("name", p.Name): v.LenString(1, 5),
+		v.F("age", p.Age):   v.Nonzero[int](),
 		v.F("family", p.Family): v.Map(func(m map[string]*Member) map[string]v.Validator {
 			schemas := make(map[string]v.Validator)
 			for relation, member := range m {

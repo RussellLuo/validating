@@ -59,6 +59,146 @@ func TestNested(t *testing.T) {
 	}
 }
 
+func TestEachMap(t *testing.T) {
+	type Stat struct {
+		Count int
+	}
+
+	cases := []struct {
+		name      string
+		value     any
+		validator v.Validator
+		errs      v.Errors
+	}{
+		{
+			name:      "nil map",
+			value:     map[string]Stat(nil),
+			validator: v.EachMap[map[string]Stat](nil),
+			errs:      nil,
+		},
+		{
+			name: "invalid",
+			value: map[string]Stat{
+				"visitor": {Count: 0},
+				"visit":   {Count: 0},
+			},
+			validator: v.EachMap[map[string]Stat](v.Nested(func(s Stat) v.Validator {
+				return v.Schema{
+					v.F("count", s.Count): v.Nonzero[int](),
+				}
+			})),
+			errs: v.Errors{
+				v.NewError("stats[visitor].count", v.ErrInvalid, "is zero valued"),
+				v.NewError("stats[visit].count", v.ErrInvalid, "is zero valued"),
+			},
+		},
+		{
+			name: "valid",
+			value: map[string]Stat{
+				"visitor": {Count: 1},
+				"visit":   {Count: 2},
+			},
+			validator: v.EachMap[map[string]Stat](v.Nested(func(s Stat) v.Validator {
+				return v.Schema{
+					v.F("count", s.Count): v.Nonzero[int](),
+				}
+			})),
+			errs: nil,
+		},
+		{
+			name: "int map",
+			value: map[string]int{
+				"k1": 1,
+				"k2": 2,
+				"k3": 3,
+			},
+			validator: v.EachMap[map[string]int](v.Range[int](1, 2)),
+			errs: v.Errors{
+				v.NewError("stats[k3]", v.ErrInvalid, "is not between the given range"),
+			},
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			errs := v.Validate(v.Schema{
+				v.F("stats", c.value): c.validator,
+			})
+			if !reflect.DeepEqual(makeErrsMap(errs), makeErrsMap(c.errs)) {
+				t.Errorf("Got (%+v) != Want (%+v)", errs, c.errs)
+			}
+		})
+	}
+}
+
+func TestEachSlice(t *testing.T) {
+	type Comment struct {
+		Content   string
+		CreatedAt time.Time
+	}
+
+	cases := []struct {
+		name      string
+		value     any
+		validator v.Validator
+		errs      v.Errors
+	}{
+		{
+			name:      "nil slice",
+			value:     []Comment(nil),
+			validator: v.EachSlice[[]Comment](nil),
+			errs:      nil,
+		},
+		{
+			name: "invalid",
+			value: []Comment{
+				{Content: "", CreatedAt: time.Time{}},
+			},
+
+			validator: v.EachSlice[[]Comment](v.Nested(func(c Comment) v.Validator {
+				return v.Schema{
+					v.F("content", c.Content):      v.Nonzero[string](),
+					v.F("created_at", c.CreatedAt): v.Nonzero[time.Time](),
+				}
+			})),
+			errs: v.Errors{
+				v.NewError("comments[0].content", v.ErrInvalid, "is zero valued"),
+				v.NewError("comments[0].created_at", v.ErrInvalid, "is zero valued"),
+			},
+		},
+		{
+			name: "valid",
+			value: []Comment{
+				{Content: "LGTM", CreatedAt: time.Now()},
+			},
+			validator: v.EachSlice[[]Comment](v.Nested(func(c Comment) v.Validator {
+				return v.Schema{
+					v.F("content", c.Content):      v.Nonzero[string](),
+					v.F("created_at", c.CreatedAt): v.Nonzero[time.Time](),
+				}
+			})),
+			errs: nil,
+		},
+		{
+			name:      "int slice",
+			value:     []int{1, 2, 3},
+			validator: v.EachSlice[[]int](v.Range[int](1, 2)),
+			errs: v.Errors{
+				v.NewError("comments[2]", v.ErrInvalid, "is not between the given range"),
+			},
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			errs := v.Validate(v.Schema{
+				v.F("comments", c.value): c.validator,
+			})
+			if !reflect.DeepEqual(makeErrsMap(errs), makeErrsMap(c.errs)) {
+				t.Errorf("Got (%+v) != Want (%+v)", errs, c.errs)
+			}
+		})
+	}
+}
+
 func TestMap(t *testing.T) {
 	type Stat struct {
 		Count int
@@ -171,7 +311,6 @@ func TestSlice(t *testing.T) {
 			value: []Comment{
 				{Content: "", CreatedAt: time.Time{}},
 			},
-
 			validator: v.Slice(func(s []Comment) (schemas []v.Validator) {
 				for _, c := range s {
 					schemas = append(schemas, v.Schema{
@@ -187,8 +326,10 @@ func TestSlice(t *testing.T) {
 			},
 		},
 		{
-			name:  "nil slice",
-			value: []Comment(nil),
+			name: "valid",
+			value: []Comment{
+				{Content: "LGTM", CreatedAt: time.Now()},
+			},
 			validator: v.Slice(func(s []Comment) (schemas []v.Validator) {
 				for _, c := range s {
 					schemas = append(schemas, v.Schema{

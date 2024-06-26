@@ -43,6 +43,8 @@ A validator factory is a function used to create a validator, which will do the 
 - [Schema](https://pkg.go.dev/github.com/RussellLuo/validating/v3#Schema)
 - [Value](https://pkg.go.dev/github.com/RussellLuo/validating/v3#Value)
 - [Nested](https://pkg.go.dev/github.com/RussellLuo/validating/v3#Nested)
+- [EachMap](https://pkg.go.dev/github.com/RussellLuo/validating/v3#EachMap)
+- [EachSlice](https://pkg.go.dev/github.com/RussellLuo/validating/v3#EachSlice)
 - [Map](https://pkg.go.dev/github.com/RussellLuo/validating/v3#Map)
 - [Slice/Array](https://pkg.go.dev/github.com/RussellLuo/validating/v3#Slice)
 - [All/And](https://pkg.go.dev/github.com/RussellLuo/validating/v3#All)
