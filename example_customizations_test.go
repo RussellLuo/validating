@@ -14,7 +14,7 @@ func mapNonzero(field *v.Field) v.Errors {
 		return v.NewUnsupportedErrors("mapNonzero", field, want)
 	}
 	if len(value) == 0 {
-		return v.NewErrors(field.Name, v.ErrInvalid, "is zero valued")
+		return v.NewInvalidErrors(field, "is zero valued")
 	}
 	return nil
 }

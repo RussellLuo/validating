@@ -339,8 +339,7 @@ func LenString(min, max int) (mv *MessageValidator) {
 		Validator: Func(func(field *Field) Errors {
 			v, ok := field.Value.(string)
 			if !ok {
-				var want string
-				return NewUnsupportedErrors("LenString", field, want)
+				return NewUnsupportedErrors("LenString", field, "")
 			}
 
 			l := len(v)
