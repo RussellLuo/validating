@@ -57,19 +57,29 @@ func (a Address) Schema() v.Schema {
 type Person struct {
 	Name    string
 	Age     int
+	Hobbies []string
 	Address Address
 }
 
 func (p Person) Schema() v.Schema {
 	return v.Schema{
-		v.F("name", p.Name):       v.LenString(1, 5).Msg("bad name"),
-		v.F("age", p.Age):         v.Gte(10).Msg("must be older than 10 years old"),
+		v.F("name", p.Name): v.All(
+			v.LenString(5, 10).Msg("bad name length"),
+			v.Match(`\w+`).Msg("bad name pattern"),
+		),
+		v.F("age", p.Age):         v.Gte(10).Msg("must be at least 10 years old"),
+		v.F("hobbies", p.Hobbies): v.EachSlice[[]string](v.In("Reading", "Sports", "Music").Msg("unknown hobby")),
 		v.F("address", p.Address): p.Address.Schema(),
 	}
 }
 
 func main() {
-	p := Person{}
+	p := Person{
+		Name:    "Foo",
+		Age:     5,
+		Hobbies: []string{"Nothing"},
+		Address: Address{City: "D"},
+	}
 	errs := v.Validate(p.Schema())
 	for _, err := range errs {
 		fmt.Println(err)
@@ -79,8 +89,9 @@ func main() {
 
 ```bash
 $ go run main.go
-name: INVALID(bad name)
-age: INVALID(must be older than 10 years old)
+name: INVALID(bad name length)
+age: INVALID(must be at least 10 years old)
+hobbies[0]: INVALID(unknown hobby)
 address.country: INVALID(empty country)
 address.city: INVALID(must be A or B or C)
 ```
