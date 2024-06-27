@@ -608,8 +608,19 @@ func Nin[T comparable](values ...T) (mv *MessageValidator) {
 }
 
 // Match is a leaf validator factory used to create a validator, which will
-// succeed when the field's value matches the given regular expression.
-func Match(re *regexp.Regexp) (mv *MessageValidator) {
+// succeed when the field's value matches the given pattern (of type string
+// or *regexp.Regexp).
+func Match(pattern any) (mv *MessageValidator) {
+	var re *regexp.Regexp
+	switch v := pattern.(type) {
+	case string:
+		re = regexp.MustCompile(v)
+	case *regexp.Regexp:
+		re = v
+	default:
+		panic(fmt.Sprintf("validating: pattern must be of type string or *regexp.Regexp, got type %T", v))
+	}
+
 	mv = &MessageValidator{
 		Message: "does not match the given regular expression",
 		Validator: Func(func(field *Field) Errors {

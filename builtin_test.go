@@ -1263,6 +1263,12 @@ func TestMatch(t *testing.T) {
 			validator: v.Match(regexp.MustCompile(`^(86)?1\d{10}$`)), // cellphone
 			errs:      nil,
 		},
+		{
+			name:      "pattern in string",
+			value:     "x13012345678",
+			validator: v.Match(`^(86)?1\d{10}$`), // cellphone
+			errs:      v.NewErrors("value", v.ErrInvalid, "does not match the given regular expression"),
+		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
