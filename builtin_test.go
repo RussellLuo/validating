@@ -286,6 +286,54 @@ func TestMap(t *testing.T) {
 	}
 }
 
+func TestPointerValue(t *testing.T) {
+	var nilStringPtr *string
+
+	tests := []struct {
+		errs   v.Errors
+		name   string
+		schema v.Schema
+	}{
+		{
+			errs: nil,
+			name: "valid e-mail address pointer",
+			schema: v.Schema{
+				v.F("value", pointer("hello")): v.PointerValue[string](v.LenString(1, 10)),
+			},
+		},
+		{
+			errs: v.NewErrors("value", v.ErrUnsupported, "expected a *int but got *string"),
+			name: "wrong type of pointer",
+			schema: v.Schema{
+				v.F("value", pointer("hello")): v.PointerValue[int](v.LenString(1, 10)),
+			},
+		},
+		{
+			errs: v.NewErrors("value", v.ErrUnsupported, "expected a *string but got <nil>"),
+			name: "nil",
+			schema: v.Schema{
+				v.F("value", nil): v.PointerValue[string](v.LenString(1, 10)),
+			},
+		},
+		{
+			errs: v.NewErrors("value", v.ErrUnsupported, "expected a non-nil pointer but got nil pointer"),
+			name: "nil pointer",
+			schema: v.Schema{
+				v.F("value", nilStringPtr): v.PointerValue[string](v.LenString(1, 10)),
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			errs := v.Validate(tt.schema)
+			if !reflect.DeepEqual(errs, tt.errs) {
+				t.Errorf("got = %v, want %v", errs, tt.errs)
+			}
+		})
+	}
+}
+
 func TestSlice(t *testing.T) {
 	type Comment struct {
 		Content   string
@@ -1280,4 +1328,8 @@ func TestMatch(t *testing.T) {
 			}
 		})
 	}
+}
+
+func pointer[T any](v T) *T {
+	return &v
 }

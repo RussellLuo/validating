@@ -258,6 +258,30 @@ func Not(validator Validator) (mv *MessageValidator) {
 	return
 }
 
+// PointerValue is a composite validator factory used to create a validator, which will
+// dereference the pointer field's value and apply the given validator to the dereferenced value.
+//
+// If the field's value is not a pointer or is nil, it will return an unsupported error.
+func PointerValue[T any](validator Validator) Validator {
+	return Func(func(field *Field) Errors {
+		ptr, isOk := field.Value.(*T)
+		if !isOk {
+			return NewErrors(field.Name, ErrUnsupported, fmt.Sprintf("expected a %T but got %T", new(T), field.Value))
+		}
+
+		if ptr == nil {
+			return NewErrors(field.Name, ErrUnsupported, "expected a non-nil pointer but got nil pointer")
+		}
+
+		field2 := Field{
+			Name:  field.Name,
+			Value: *ptr,
+		}
+
+		return validator.Validate(&field2)
+	})
+}
+
 // Is is a leaf validator factory used to create a validator, which will
 // succeed when the predicate function f returns true for the field's value.
 func Is[T any](f func(T) bool) (mv *MessageValidator) {
