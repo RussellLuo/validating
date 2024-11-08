@@ -68,7 +68,7 @@ func (p Person) Schema() v.Schema {
 			v.Match(`\w+`).Msg("bad name pattern"),
 		),
 		v.F("age", p.Age):         v.Gte(10).Msg("must be at least 10 years old"),
-		v.F("hobbies", p.Hobbies): v.EachSlice[[]string](v.In("Reading", "Sports", "Music").Msg("unknown hobby")),
+		v.F("hobbies", p.Hobbies): v.EachSlice[[]string](v.In("Music", "Sports").Msg("unknown hobby")),
 		v.F("address", p.Address): p.Address.Schema(),
 	}
 }
@@ -148,6 +148,7 @@ A validator factory is a function used to create a validator, which will do the 
 ## Examples
 
 - [Simple value](example_simple_value_test.go)
+- [Simple pointer](example_simple_pointer_test.go)
 - [Simple string (is IP?)](example_simple_string_isip_test.go)
 - [Simple struct](example_simple_struct_test.go)
 - [Simple slice](example_simple_slice_test.go)
