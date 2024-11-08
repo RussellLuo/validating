@@ -6,8 +6,8 @@ import (
 )
 
 const (
-	ErrUnsupported = "UNSUPPORTED"
-	ErrInvalid     = "INVALID"
+	ErrUnsupported = "UNSUPPORTED" // errors reported to developers. (panic is more appropriate?)
+	ErrInvalid     = "INVALID"     // errors reported to users.
 )
 
 type Error interface {
